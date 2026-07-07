@@ -85,3 +85,7 @@ routed through Human Review, never self-applied.
 ## Relationships
 Consulted alongside QENKI_MIND_ORGANS_v1.md and
 QENKI_MIND_ONTOLOGY_v1.md.
+
+
+## Persistent Epistemic Layer
+An architectural decision introduced by ADR-008: Qenki-Mind maintains exactly one authority authorized to produce transitions of the epistemic state, while the concrete persistence substrate remains an implementation concern.

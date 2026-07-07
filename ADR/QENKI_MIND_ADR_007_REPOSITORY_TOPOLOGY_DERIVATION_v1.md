@@ -1,7 +1,7 @@
 # ADR-007: Repository Topology Derivation
 
 ## Status
-Accepted
+Closed
 
 ## Context
 During materialization of Qenki-Mind's repository structure, a recurring
@@ -81,7 +81,7 @@ cognitive behavior.
   reported only in `MATURITY_STATUS.md`, pending explicit canonical
   topology requirements. This is a statement about the current
   architecture, not a permanent prohibition — if a future canonical
-  document, or a future Accepted ADR absorbed into the canonical
+  document, or a future Closed ADR absorbed into the canonical
   documents, explicitly establishes such a domain, materialization
   becomes permissible without conflicting with this ADR.
 - Future repository materialization work must verify explicit canonical

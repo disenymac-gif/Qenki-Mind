@@ -130,3 +130,94 @@ existence, purpose, ownership, and role.
 
 ## Origin
 Absorbed from QENKI_MIND_ADR_007_REPOSITORY_TOPOLOGY_DERIVATION_v1.md.
+
+
+## Dependency Inversion for Canonical Levels
+Higher-level canonical documents define contracts and properties; they do not name or depend on concrete implementation identities. Lower-level implementation documents satisfy the contracts defined above them. No canonical document may require knowledge of a specific repository directory, runtime class, or organ name unless that identity is itself part of the relevant level's explicit contract.
+
+## Canonical Change Constraint Matrix
+Each canonical level is constrained by the kind of change that may legitimately force an update. Changes outside the listed causes are architectural leakage.
+
+| Level | May change by | Must not change by |
+|---|---|---|
+| Ontology | Evolution of the cognitive model | Organ reorganization, runtime changes, storage changes |
+| ADR | New architectural decision | Implementation changes |
+| Cognitive Architecture | New functional organization | Technology changes |
+| Organs | Redistribution of responsibilities | Directory names or infrastructure changes |
+| Runtime / Repository | Technology, persistence, deployment | Conceptual changes |
+
+## Governance Test
+If a change to a lower-level implementation forces an update to a higher-level canonical level, the design contains architectural leakage. Higher-level documents only change when their own level's abstraction changes.
+
+## Canonical Level Dependency Principle
+Canonical levels depend only on abstractions defined at their own level or above. Concrete implementations depend on canonical contracts, never the reverse.
+
+## Stability Gradient
+Higher canonical levels should change less frequently than lower ones. Stability is a deliberate architectural property, not an accident of history.
+
+| Level | Expected stability |
+|---|---|
+| Ontology | Very high (years) |
+| Governance | Very high |
+| ADR | High |
+| Cognitive Architecture | Medium |
+| Organs | Medium-high |
+| Runtime / Repository | Low (frequent changes) |
+
+## Architectural Health
+Architectural health improves when changes concentrate in lower levels while higher levels remain stable. Frequent Ontology or ADR churn is a sign of architectural volatility. Runtime and repository changes are expected to be the most common.
+
+## Volatility vs Leakage
+Architectural leakage occurs when a lower-level change forces an unnecessary higher-level change. Architectural volatility occurs when a higher-level document changes too frequently for its level. These are distinct pathologies and must be evaluated separately.
+
+## Canon Introduction Constraint
+No new principle may be added to the canon unless it resolves a class of problems not already expressible by existing principles. This protects the canon from redundant growth and preserves explanatory economy.
+
+## Canon Completeness Test
+For any change, the lowest applicable level should be identified first. The canonical questions are: what concept changes (Ontology), what decision changes (ADR), what contract changes (Cognitive Architecture), what implementation changes (Organs), and what technology changes (Runtime / Repository). The correct answer should always be the lowest level that fully resolves the change.
+
+## Independence Check
+Before a new governance principle is added, test whether removing it would reduce the canon's ability to decide real cases. If not, the principle is likely a corollary of an existing rule and should not exist as an independent canon rule.
+
+## Canon State
+A canon is complete when it can explain all relevant changes. A canon is closed when any new principle must justify why existing principles are insufficient.
+
+## Principle Validation
+Each governance principle must declare: Purpose, Scope, Validation, and Failure Mode. Validation states what evidence would show the principle is no longer sufficient. Failure Mode states what happens when the principle no longer predicts or governs real cases correctly.
+
+## Empirical Modification Rule
+Any proposal to add or modify a canon principle must be accompanied by at least one real case that existing principles cannot resolve unambiguously. If no such case exists, the burden of proof remains on the proposer and the canon should not expand.
+
+## Canon as Falsifiable System
+The canon is treated as a falsifiable system of governance hypotheses. Principles persist because they continue to explain and predict real architectural decisions; they fail when they no longer do so.
+
+## Governance Scope
+This document governs Qenki-Mind only. Rules that govern how canons, ADRs, specifications, or registries are validated across the broader Qenki ecosystem belong to Qenki-Core Governance, not to Qenki-Mind. Qenki-Mind may reference such rules only as external constraints, not as its own architectural content.
+
+## Scope Leakage Test
+If a rule would still make sense after Qenki-Mind is removed, that rule likely does not belong in Qenki-Mind Governance. Such rules are candidates for Qenki-Core Governance.
+
+## Rule Type Classification
+Governance rules determine who decides, what is owned, how scope is bounded, how change is processed, and how exceptions are handled. Standards define what artifacts must satisfy. System-specific architecture describes how a concrete system implements the governing contracts and standards.
+
+## Classification Test
+Ask three questions: who decides (Governance), what must be satisfied (Standard), and how is it implemented (System-specific architecture). If a rule does not determine decision authority, it is not Governance.
+
+## Standards Boundary
+Principles such as Principle Validation, Canon Completeness, Independence Check, Canon Closed, Falsifiability, and Canon Introduction Constraint are standards of canon quality, not Governance rules of Qenki-Mind. Qenki-Mind may reference them as external standards if required, but they belong to the broader Qenki-Core standards layer.
+
+## Normative Knowledge Dimensions
+Normative knowledge in the ecosystem is divided into four orthogonal dimensions: Governance, Standards, Processes, and Policies. Governance answers who has authority over what object. Standards answer what properties the object must satisfy. Processes answer how the object changes over time. Policies answer what restrictions and exceptions apply.
+
+## Object-Governance Matrix
+Each object can be governed, standardized, processed, and constrained independently. A document may participate in more than one dimension, but each dimension must be explicitly declared rather than mixed implicitly.
+
+| Object | Governance | Standards | Processes | Policies |
+|---|---|---|---|---|
+| Canon | ✓ | ✓ | ✓ | ✓ |
+| ADR | ✓ | ✓ | ✓ | ✓ |
+| Specification | ✓ | ✓ | ✓ | ✓ |
+| Registry | ✓ | ✓ | ✓ | ✓ |
+
+## Document Purity
+Canonical and operational documents should avoid mixing authority, requirements, workflows, and restrictions unless they explicitly declare the mixed role. If a document carries more than one normative dimension, the dimensions must be separated into named sections.

@@ -11,7 +11,7 @@ Qenki-Mind (normative canonical document)
 ## Lifecycle
 Stable. Dependency declarations change only when a new organism-wide
 dependency is identified or a contract is added; live synchronization
-status for each dependency is tracked separately in HEALTH/, not here.
+status for each dependency is tracked elsewhere in Qenki-Mind's operational state, not here.
 
 ## Organism-Wide Dependency Declarations
 
@@ -43,12 +43,12 @@ status for each dependency is tracked separately in HEALTH/, not here.
 - Local Role: input to Opportunity's World State synthesis
 - Contract Satisfied: Contract 04 — Situational Awareness Contract
 - Consumed by: Opportunity only
-- Declared locally in ORGANS/OPPORTUNITY/, not in this document, since it
+- Declared locally outside this document (for example in organ-level configuration), since it
   is not an organism-wide dependency.
 
 ## Note on Synchronization Status
 Live synchronization status (current/stale/unknown) for each dependency
-declared above is tracked in HEALTH/, not in this document, since
+declared above is tracked elsewhere in Qenki-Mind's operational state, not in this document, since
 freshness is a live operational state rather than a stable architectural
 declaration.
 

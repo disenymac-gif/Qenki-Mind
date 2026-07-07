@@ -32,8 +32,10 @@ and absorbed. Seven ADRs have been raised, accepted, and closed, each
 having its invariants fully absorbed into the canonical documents.
 Behavioral ambiguities (ADR-001 through ADR-006) concern how the
 organism reasons; governance ambiguities (ADR-007) concern how canonical
-architecture is translated into repository topology. Any future ADR
-would only be raised if a new behavioral or governance ambiguity
+architecture is translated into repository topology. ADR-008 is currently
+proposed to resolve whether Qenki-Mind includes a persistent epistemic
+layer as part of its cognitive architecture and repository topology. Any
+future ADR would only be raised if a new behavioral or governance ambiguity
 producing externally observable divergence is discovered.
 
 ## Integration Readiness
@@ -69,22 +71,13 @@ QENKI_MIND_GOVERNANCE_RULES_v1.md:
 ### Operational State
 The organism's capacity to hold and act on its own reasoning-in-progress.
 Case: 2 — Capability canonically supported, topology not defined.
-Status: No canonical repository requirement currently established under
-the Repository Topology Derivation principle defined in
-QENKI_MIND_GOVERNANCE_RULES_v1.md. This capability has not been
-architecturally scoped as requiring persistent storage; its maturity
-cannot yet be assessed pending that determination.
+Status: No repository domain has currently been materialized in the repository under the Repository Topology Derivation principle defined in QENKI_MIND_GOVERNANCE_RULES_v1.md. This capability is architecturally scoped in the canonical documents as a conceptual capacity rather than a persistent repository domain; its maturity cannot yet be assessed until any corresponding topology is explicitly defined.
 
 ### Persistent Knowledge
 The organism's capacity to retain canonical memory and permanent records
 across cycles.
 Case: 2 — Capability canonically supported, topology not defined.
-Status: No canonical repository requirement currently established under
-the Repository Topology Derivation principle defined in
-QENKI_MIND_GOVERNANCE_RULES_v1.md. The Ontology establishes that Facts
-are semantically permanent once promoted, but no canonical document
-currently mandates a corresponding repository domain, its ownership, or
-its architectural purpose.
+Status: No repository domain has currently been materialized in the repository under the Repository Topology Derivation principle defined in QENKI_MIND_GOVERNANCE_RULES_v1.md. The Ontology establishes that Facts are semantically permanent once promoted, and architectural responsibilities for persistent records are defined by the canonical documents and ADRs, but any concrete repository topology remains intentionally deferred until explicitly declared.
 
 ### Supporting Infrastructure
 The organism's capacity to monitor its own health, retain a trace of its

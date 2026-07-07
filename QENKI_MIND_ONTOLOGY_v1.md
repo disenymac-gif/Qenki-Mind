@@ -42,7 +42,7 @@ An Observation formally linked to a claim it supports or challenges.
 Created by the Sense-Making Organ. Permanent, immutable once created.
 
 ### Fact
-A claim considered settled beyond reasonable doubt.
+A claim considered settled beyond reasonable doubt. Fact is a conceptual cognitive object; repository topology and persistent epistemic-layer materialization are decided elsewhere.
 
 **Promotion Invariant (binding, from ADR-001):** A Belief promotes to
 Fact if and only if independently-sourced Evidence converges above a
@@ -116,7 +116,7 @@ Expression Organ. Permanent record once released.
 
 ### Learning
 An update produced by comparing a prediction against an actual outcome.
-Created by the Learning & Reflection Organ.
+Created by the Learning & Reflection Organ. Learning is a conceptual cognitive object; repository topology and persistent epistemic-layer materialization are decided elsewhere.
 
 **Terminal State Invariant (binding, from ADR-004):** Every prediction
 tied to a Decision or Expression must eventually reach a terminal state.

@@ -104,3 +104,7 @@ any other organ.
 ## Relationships
 Consulted alongside QENKI_MIND_ONTOLOGY_v1.md and
 QENKI_MIND_COGNITIVE_ARCHITECTURE_v1.md.
+
+
+## Persistent Epistemic Layer Ownership
+Learning & Reflection currently implements the authority authorized to produce transitions of the epistemic state. This is an implementation of the ADR-defined invariant, not the invariant itself.
