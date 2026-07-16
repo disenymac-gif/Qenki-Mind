@@ -1,63 +1,67 @@
-# OPERATORS
+# Operators
 
-This directory contains the nine canonical cognitive operators that
-implement Qenki-Mind's processing pipeline, plus the engine
-infrastructure that orchestrates them.
+Canonical cognitive operators for the Qenki-Mind pipeline.
+All operators follow the `CognitiveOperator` interface defined in
+`OPERATORS/engine.py`: `inputs()`, `validate()`, `execute()`,
+`persist()`, `emit_events()`.
 
 ## Pipeline
 
 ```
-LEARNING  -> LearningToMemory       -> MEMORY
-MEMORY    -> MemoryToReasoning      -> REASONING_PARAMETERS (+ session.memory_loaded)
-LEARNING  -> LearningToBelief       -> BELIEFS
-EPISTEMIC_EVIDENCE -> EvidenceToBeliefUpdate -> BELIEFS (confidence updated)
-BELIEFS   -> BeliefToFact           -> FACTS (+ BELIEFS updated to Promoted)
-EVIDENCE  -> OpportunityToDecision  -> DECISIONS
-DECISIONS -> DecisionToExpression   -> EXPRESSIONS
-EXPRESSIONS -> ExpressionToConsequence -> EVENTS / WORLD_STATE
-EVENTS    -> ConsequenceToLearning  -> LEARNING
-```
-
-## Quick start
-
-```python
-from OPERATORS import build_engine
-
-engine  = build_engine()
-session = engine.start_session(trigger="manual", root_entity="BELIEFS/my-belief.md")
-
-# Route new Evidence into a Belief (updates confidence)
-artifact = engine.run("EvidenceToBeliefUpdate",
-                      "EPISTEMIC_EVIDENCE/evidence-x.md", session=session)
-
-# Promote a Belief to Fact (requires confidence >= 0.80)
-fact = engine.run("BeliefToFact", "BELIEFS/my-belief.md", session=session)
+Learning  -->  LearningToMemory      -->  MEMORY/
+                                          |
+              MemoryToReasoning      -->  REASONING/
+                                          |
+              OpportunityToDecision  -->  DECISIONS/
+                                          |
+              DecisionToExpression   -->  EXPRESSIONS/
+                                          |
+              ExpressionToConsequence -->  CONSEQUENCES/
+                                          |
+              ConsequenceToLearning  -->  LEARNING/
+                                          |
+              LearningToBelief       -->  BELIEFS/
+                                          |
+              BeliefToFact           -->  FACTS/          (promotion arc)
+                                          |
+              EvidenceToBeliefUpdate -->  BELIEFS/        (evidence arc)
+                  |                            |
+                  +-- sets Regression Pending  |
+                                               v
+              BeliefRegression       -->  FACTS/ (Regressed) + BELIEFS/ (Active)
 ```
 
 ## Operators
 
-| Name | Input | Output | Persists to | Authority |
+| # | Operator | Input domain | Output domain | Authority |
 |---|---|---|---|---|
-| `LearningToMemory` | `LEARNING/*.md` | `MEMORY/*.md` | `MEMORY/` | Memory Organ |
-| `MemoryToReasoning` | `MEMORY/*.md` | `REASONING_PARAMETERS/*.md` | `REASONING_PARAMETERS/` + session | Memory Organ |
-| `LearningToBelief` | `LEARNING/*.md` | `BELIEFS/*.md` | `BELIEFS/` | Learning & Reflection Organ |
-| `EvidenceToBeliefUpdate` | `EPISTEMIC_EVIDENCE/*.md` | updated `BELIEFS/*.md` | `BELIEFS/` + `EPISTEMIC_EVIDENCE/` | Learning & Reflection Organ |
-| `BeliefToFact` | `BELIEFS/*.md` | `FACTS/*.md` | `FACTS/` + `BELIEFS/` (state update) | Learning & Reflection Organ |
-| `OpportunityToDecision` | `EVIDENCE/*.md` | `DECISIONS/*.md` | `DECISIONS/` | Decision Organ |
-| `DecisionToExpression` | `DECISIONS/*.md` | `EXPRESSIONS/*.md` | `EXPRESSIONS/` | Expression Organ |
-| `ExpressionToConsequence` | `EXPRESSIONS/*.md` | Event record | `EVENTS/` | Learning & Reflection Organ |
-| `ConsequenceToLearning` | Event record path | `LEARNING/*.md` | `LEARNING/` | Learning & Reflection Organ |
+| 1 | `LearningToMemory` | `LEARNING/` | `MEMORY/` | Learning & Reflection Organ |
+| 2 | `MemoryToReasoning` | `MEMORY/` | `REASONING/` | Learning & Reflection Organ |
+| 3 | `OpportunityToDecision` | `REASONING/` | `DECISIONS/` | Decision Organ |
+| 4 | `DecisionToExpression` | `DECISIONS/` | `EXPRESSIONS/` | Expression Organ |
+| 5 | `ExpressionToConsequence` | `EXPRESSIONS/` | `CONSEQUENCES/` | Expression Organ |
+| 6 | `ConsequenceToLearning` | `CONSEQUENCES/` | `LEARNING/` | Learning & Reflection Organ |
+| 7 | `LearningToBelief` | `LEARNING/` | `BELIEFS/` | Learning & Reflection Organ |
+| 8 | `BeliefToFact` | `BELIEFS/` | `FACTS/` | Learning & Reflection Organ |
+| 9 | `EvidenceToBeliefUpdate` | `EPISTEMIC_EVIDENCE/` | `BELIEFS/` | Learning & Reflection Organ |
+| 10 | `BeliefRegression` | `BELIEFS/` (Regression Pending) | `FACTS/` (Regressed) + `BELIEFS/` (Active) | Learning & Reflection Organ |
 
-## Infrastructure
+## Epistemic Lifecycle (ADR-001 + ADR-008)
 
-| File | Purpose |
-|---|---|
-| `engine.py` | `CognitiveEngine`, `CognitiveSession`, `CognitiveOperator`, `EventBus`, `OperatorRunResult` |
-| `registry.py` | `OperatorRegistry` — key/class store |
-| `__init__.py` | `default_registry` (all 9 operators pre-registered), `build_engine()` factory |
+```
+Learning  -[LearningToBelief]->   Belief (Active)
+                                      |
+                              [BeliefToFact]
+                                      |
+                                   Fact (Promoted)
+                                      |
+                     [EvidenceToBeliefUpdate: Contradicting]
+                                      |
+                          Belief (Regression Pending)
+                                      |
+                           [BeliefRegression]
+                                      |
+                     Fact (Regressed) + Belief (Active)
+```
 
-## Adding an operator
-
-1. Create `OPERATORS/<Name>/operator.py` with `class Operator(CognitiveOperator)`.
-2. Add `from .<Name>.operator import Operator as <Name>` to `__init__.py`.
-3. Call `default_registry.register("<Name>", <Name>)` in `__init__.py`.
+The full reinforcement + regression cycle is now implemented.
