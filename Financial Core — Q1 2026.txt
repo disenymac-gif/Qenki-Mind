@@ -1,0 +1,112 @@
+Auditoría final de validación del Financial Core — Q1 2026
+
+El objetivo de esta auditoría no es mejorar el sistema.
+
+El objetivo es demostrar, con evidencia, que el Financial Core produce un resultado fiscal correcto y defendible frente a una revisión de la AEAT.
+
+Trabaja únicamente sobre el estado actual del repositorio y sobre la reconstrucción completa de Q1 ya ejecutada.
+
+No propongas nuevas arquitecturas, refactorizaciones ni mejoras salvo que detectes un error objetivo.
+
+Auditoría en dos dimensiones
+
+A. Auditoría interna del Financial Core
+
+Valida el sistema completo de extremo a extremo.
+
+Comprueba:
+
+* parsers;
+* normalización;
+* ledger;
+* modelos fiscales;
+* auditoría;
+* generación del libro fiscal.
+
+Demuestra que:
+
+* P05
+* P06
+* P07
+* P08
+* P09
+
+han quedado correctamente resueltos.
+
+Comprueba expresamente que no existe ninguna regresión sobre casos anteriormente correctos.
+
+Recorre el flujo completo desde el documento original hasta el modelo fiscal.
+
+No te detengas en el componente corregido.
+
+Verifica que el resultado final también es correcto.
+
+⸻
+
+B. Auditoría frente a la normativa AEAT
+
+No compares el sistema con implementaciones anteriores.
+
+Compáralo con la normativa tributaria española.
+
+Verifica que los resultados obtenidos cumplen correctamente, entre otros aspectos:
+
+* Modelo 303.
+* Modelo 130.
+* Modelo 349.
+* IVA soportado.
+* IVA repercutido.
+* Inversión del sujeto pasivo.
+* Operaciones intracomunitarias.
+* Operaciones extracomunitarias.
+* Bienes de inversión.
+* Gastos deducibles.
+* Tratamiento de movimientos personales.
+* Exclusiones fiscales.
+* Conciliación entre libros registro y modelos fiscales.
+
+Para cada comprobación indica expresamente si:
+
+* cumple la normativa;
+* incumple la normativa;
+* o la normativa permite varias interpretaciones razonables.
+
+Cuando exista más de una interpretación aceptable, indícalo explícitamente y explica cuál ha implementado el Financial Core.
+
+No marques como error aquello que sea una diferencia de criterio fiscal razonable.
+
+⸻
+
+Revisión de advertencias
+
+Analiza los 19 WARN restantes.
+
+Para cada uno determina si pertenece a una de estas categorías:
+
+* Error real que debe impedir cerrar Q1.
+* Advertencia correcta cuyo comportamiento es el esperado.
+* Mejora futura que no afecta a la validez fiscal de Q1.
+
+No abras nuevos problemas simplemente porque descubras oportunidades de mejora.
+
+Solo crea una incidencia cuando exista evidencia objetiva de que el sistema produce un resultado fiscal incorrecto o incumple la normativa.
+
+⸻
+
+Resultado esperado
+
+El informe final debe responder únicamente a esta pregunta:
+
+¿Existe alguna razón técnica o fiscal objetiva por la que Q1 NO deba convertirse en el baseline bloqueado del Financial Core?
+
+Si la respuesta es afirmativa:
+
+* enumera únicamente los errores reales.
+
+Si la respuesta es negativa:
+
+* declara expresamente que, con la evidencia disponible, el trimestre es consistente tanto con el diseño del Financial Core como con la normativa tributaria aplicable.
+
+No diseñes nuevas funcionalidades durante esta auditoría.
+
+Primero demuestra si el sistema actual es correcto o no.

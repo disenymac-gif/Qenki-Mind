@@ -50,6 +50,20 @@ class CognitiveOperator:
     def emit_events(self, *args, **kwargs):
         raise NotImplementedError
 
+class OperatorRunResult:
+    """
+    Explicit separation between an operator's three outputs:
+    - result: private in-memory data returned by execute(). Not part of
+      the public pipeline contract between operators.
+    - artifact: the persisted entity (e.g. a Path) returned by persist().
+      This is what a pipeline chains to the next operator.
+    - events: events emitted by emit_events().
+    """
+    def __init__(self, result, artifact, events):
+        self.result = result
+        self.artifact = artifact
+        self.events = events
+
 class CognitiveEngine:
     def __init__(self, registry=None, event_bus=None):
         self.registry = registry or OperatorRegistry()
@@ -58,25 +72,49 @@ class CognitiveEngine:
     def start_session(self, trigger, root_entity, world_state_snapshot=None, objectives_snapshot=None, memory_loaded=None):
         return CognitiveSession(trigger, root_entity, world_state_snapshot, objectives_snapshot, memory_loaded)
 
-    def run(self, operator, entity, session=None, **kwargs):
+    def _run_operator(self, operator, entity, session=None, **kwargs):
+        """
+        Shared implementation. Executes a single operator and returns the
+        full OperatorRunResult (result, artifact, events). Used internally
+        by both run() and run_pipeline() so behavior stays in one place.
+        """
         op_cls = self.registry.get(operator)
         op = op_cls(self.event_bus)
         op.validate(entity, session=session, **kwargs)
         result = op.execute(entity, session=session, **kwargs)
         artifact = op.persist(result, session=session, **kwargs)
         emitted = op.emit_events(result, session=session, **kwargs)
+        emitted = emitted if isinstance(emitted, list) else ([emitted] if emitted else [])
+
         if session is not None:
             session.operators_executed.append(operator)
             if artifact is not None:
                 session.artifacts_created.append(str(artifact))
             if emitted:
-                session.events_emitted.extend(emitted if isinstance(emitted, list) else [emitted])
-        return result
+                session.events_emitted.extend(emitted)
+
+        return OperatorRunResult(result=result, artifact=artifact, events=emitted)
+
+    def run(self, operator, entity, session=None, **kwargs):
+        """
+        Public API for executing a single operator in isolation.
+        Returns result only, preserving the original return type for
+        backward compatibility with existing and future callers.
+        """
+        run_result = self._run_operator(operator, entity, session=session, **kwargs)
+        return run_result.result
 
     def run_pipeline(self, entity, pipeline, session=None, **kwargs):
+        """
+        Public API for orchestrating a sequence of operators. Chains the
+        persisted artifact (not the in-memory result) from one operator
+        to the next, so each operator consumes exactly what the previous
+        one persisted.
+        """
         current = entity
         for operator in pipeline:
-            current = self.run(operator, current, session=session, **kwargs)
+            run_result = self._run_operator(operator, current, session=session, **kwargs)
+            current = run_result.artifact
         if session is not None:
             session.close("Completed")
         return current
