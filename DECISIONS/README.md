@@ -27,3 +27,9 @@ Owned by the appropriate organ per the canonical architecture. Only that organ m
 
 ## Lifecycle
 This repository evolves as new entities are created and enriched. The repository is operational, not canonical architecture.
+
+## Prediction Representation Convention
+Predictions may optionally use the form `- [id] statement (state: pending|confirmed|disconfirmed)` to enable machine resolution by operators such as ExpressionToConsequence. Plain text bullets remain valid and are treated as non-machine-resolvable.
+
+## Prediction Representation Convention
+Predictions may optionally use the form `- [id] statement (state: pending|confirmed|disconfirmed)` to enable machine resolution by operators such as ExpressionToConsequence. Plain text bullets remain valid and are treated as non-machine-resolvable.
