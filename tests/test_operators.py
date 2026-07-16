@@ -7,14 +7,9 @@ Coverage:
   PASS  DecisionToExpression   — full execute/persist/emit cycle
   PASS  ExpressionToConsequence — full execute/persist/emit cycle
   PASS  ConsequenceToLearning  — full execute/persist/emit cycle
-  PASS  OpportunityToDecision  — import + registry availability only
+  PASS  OpportunityToDecision  — full execute/persist/emit cycle (selected + rejected paths)
   PASS  build_engine / default_registry — factory + registration check
   PASS  Pipeline LearningToMemory → MemoryToReasoning — chained artifact contract
-
-PENDING (documented):
-  OpportunityToDecision functional test — blocked until REASONERS contract
-  is certified (EvidenceRanker, HypothesisGenerator, ConfidenceEstimator,
-  DecisionSelector). See OPERATORS/OpportunityToDecision/README.md.
 """
 
 import pytest
@@ -259,7 +254,6 @@ class TestMemoryToReasoning:
         assert session.memory_loaded.count("Repeated insight.") == 1
 
     def test_persist_creates_snapshot_file(self, tmp_path, monkeypatch):
-        # Point BASE to tmp_path so snapshot writes to tmp_path/REASONING_PARAMETERS/
         monkeypatch.syspath_prepend(str(tmp_path))
         mem_path = tmp_path / "MEMORY" / "memory-snap.md"
         _make_memory_entity(mem_path)
@@ -488,16 +482,27 @@ class TestConsequenceToLearning:
 
 
 # ---------------------------------------------------------------------------
-# OpportunityToDecision — availability only
-# PENDING: functional test blocked on REASONERS integration contract.
-# EvidenceRanker, HypothesisGenerator, ConfidenceEstimator, DecisionSelector
-# must expose a certified test-safe interface before a functional test can
-# be written without mocking internals that may change.
+# OpportunityToDecision — full functional coverage
 # ---------------------------------------------------------------------------
 
-class TestOpportunityToDecisionAvailability:
+class TestOpportunityToDecision:
+    """
+    Full execute/persist/emit cycle for OpportunityToDecision.
+
+    REASONERS are deterministic and side-effect-free; no mocking required.
+
+    Confidence arithmetic (from ConfidenceEstimator + EvidenceRanker):
+      world_state  → ev-world-state  weight=0.40
+      objectives   → ev-objectives   weight=0.35
+      memory item  → ev-memory-001   weight=0.25 / max(len(memory), 1)
+
+    Selected path  : world_state + objectives → confidence=0.75 >= 0.50 → selected=True
+    Rejected path  : no inputs               → confidence=0.00 <  0.50 → selected=False
+    """
+
+    # --- availability (preserved from prior stub) ---
+
     def test_operator_importable(self):
-        """OpportunityToDecision must be importable without error."""
         from OPERATORS.OpportunityToDecision.operator import Operator  # noqa: F401
 
     def test_operator_registered_in_default_registry(self):
@@ -508,6 +513,296 @@ class TestOpportunityToDecisionAvailability:
         from OPERATORS.OpportunityToDecision.operator import Operator
         op = Operator()
         assert op.inputs() == ["opportunity_entity", "world_state", "objectives", "memory"]
+
+    # --- validate ---
+
+    def test_validate_accepts_non_empty_entity(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        assert op.validate("opportunity-growth-q3") is True
+
+    def test_validate_rejects_empty_entity(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        with pytest.raises(ValueError):
+            op.validate(None)
+
+    def test_validate_rejects_empty_string(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        with pytest.raises(ValueError):
+            op.validate("")
+
+    # --- execute: selected path ---
+
+    def test_execute_selected_when_world_state_and_objectives_present(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        result = op.execute(
+            "opportunity-alpha",
+            world_state="nominal",
+            objectives="growth",
+        )
+        assert result["selected"] is True
+        assert result["confidence"] >= 0.50
+        assert len(result["predictions"]) >= 1
+        assert len(result["hypotheses"]) >= 1
+        assert len(result["evidence_set"]) == 2
+
+    def test_execute_decision_id_derived_from_entity(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        result = op.execute(
+            "opportunity-beta",
+            world_state="nominal",
+            objectives="alignment",
+        )
+        assert "decision" in result["decision_id"] or "beta" in result["decision_id"]
+
+    def test_execute_memory_injected_into_evidence(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        result = op.execute(
+            "opportunity-gamma",
+            world_state="nominal",
+            objectives="stability",
+            memory=["Prior learning item one.", "Prior learning item two."],
+        )
+        sources = [e["source"] for e in result["evidence_set"]]
+        assert "Memory" in sources
+        assert result["confidence"] >= 0.50
+
+    def test_execute_session_memory_loaded_consumed(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        from OPERATORS.engine import CognitiveSession
+        session = CognitiveSession(
+            trigger="test",
+            root_entity="opportunity-session",
+            memory_loaded=["Session memory item."],
+        )
+        op = Operator()
+        result = op.execute(
+            "opportunity-session",
+            world_state="nominal",
+            objectives="test",
+            session=session,
+        )
+        memory_sources = [e for e in result["evidence_set"] if e["source"] == "Memory"]
+        assert len(memory_sources) >= 1
+
+    # --- execute: rejected path ---
+
+    def test_execute_rejected_when_no_evidence(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        result = op.execute("opportunity-no-evidence")
+        assert result["selected"] is False
+        assert result["confidence"] < 0.50
+        assert result["predictions"] == []
+        assert len(result["evidence_set"]) == 0
+
+    def test_execute_rejected_confidence_is_zero_with_no_inputs(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator()
+        result = op.execute("opportunity-zero")
+        assert result["confidence"] == 0.0
+
+    # --- persist: selected path ---
+
+    def test_persist_selected_creates_decision_and_evidence_files(self, tmp_path):
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator()
+            result = op.execute(
+                "opportunity-persist-selected",
+                world_state="nominal",
+                objectives="growth",
+            )
+            artifact = op.persist(result)
+            assert artifact.exists()
+            assert artifact.parent.name == "DECISIONS"
+            evidence_dir = tmp_path / "EVIDENCE"
+            assert evidence_dir.exists()
+            evidence_files = list(evidence_dir.glob("evidence_set_for_*.md"))
+            assert len(evidence_files) == 1
+        finally:
+            otd_mod.BASE = original_base
+
+    def test_persist_selected_decision_has_canonical_structure(self, tmp_path):
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator()
+            result = op.execute(
+                "opportunity-structure",
+                world_state="stable",
+                objectives="clarity",
+            )
+            decision_path = op.persist(result)
+            sections = em.load_entity(decision_path)
+            for field in ["Identity", "Ownership", "Canonical Basis", "Context",
+                          "Hypotheses", "Predictions", "Consequences", "Learning",
+                          "Links", "Current State", "Change History", "Last Updated"]:
+                assert field in sections, f"Missing field: {field}"
+            assert sections["Current State"] == "Selected"
+        finally:
+            otd_mod.BASE = original_base
+
+    def test_persist_selected_decision_identity_compatible_with_decision_to_expression(self, tmp_path):
+        """
+        DecisionToExpression calls .replace('decision-', 'expression-', 1) on Identity.
+        Identity must start with 'decision-' for the downstream contract to hold.
+        """
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator()
+            result = op.execute(
+                "opportunity-downstream",
+                world_state="nominal",
+                objectives="pipeline",
+            )
+            decision_path = op.persist(result)
+            sections = em.load_entity(decision_path)
+            assert sections["Identity"].startswith("decision-"), (
+                f"Identity '{sections['Identity']}' must start with 'decision-' "
+                f"for DecisionToExpression downstream contract."
+            )
+        finally:
+            otd_mod.BASE = original_base
+
+    def test_persist_selected_evidence_entity_has_confidence(self, tmp_path):
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator()
+            result = op.execute(
+                "opportunity-confidence-check",
+                world_state="nominal",
+                objectives="test",
+            )
+            op.persist(result)
+            evidence_files = list((tmp_path / "EVIDENCE").glob("evidence_set_for_*.md"))
+            sections = em.load_entity(evidence_files[0])
+            assert "Confidence Estimate" in sections
+            confidence_val = float(sections["Confidence Estimate"])
+            assert 0.0 <= confidence_val <= 1.0
+        finally:
+            otd_mod.BASE = original_base
+
+    # --- persist: rejected path ---
+
+    def test_persist_rejected_creates_only_evidence_file(self, tmp_path):
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator()
+            result = op.execute("opportunity-rejected")
+            artifact = op.persist(result)
+            assert artifact.exists()
+            assert artifact.parent.name == "EVIDENCE"
+            decisions_dir = tmp_path / "DECISIONS"
+            if decisions_dir.exists():
+                assert list(decisions_dir.glob("*.md")) == []
+        finally:
+            otd_mod.BASE = original_base
+
+    # --- emit_events ---
+
+    def test_emit_events_decision_created_when_selected(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        bus = MagicMock()
+        bus.emit.return_value = {"event_id": "evt-000010", "type": "DecisionCreated"}
+        op = Operator(event_bus=bus)
+        result = op.execute(
+            "opportunity-emit-selected",
+            world_state="nominal",
+            objectives="test",
+        )
+        events = op.emit_events(result)
+        assert len(events) == 1
+        call_kwargs = bus.emit.call_args
+        event_type = (
+            call_kwargs[1].get("event_type") or call_kwargs[0][0]
+        )
+        assert event_type == "DecisionCreated"
+
+    def test_emit_events_decision_rejected_when_not_selected(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        bus = MagicMock()
+        bus.emit.return_value = {"event_id": "evt-000011", "type": "DecisionRejected"}
+        op = Operator(event_bus=bus)
+        result = op.execute("opportunity-emit-rejected")
+        events = op.emit_events(result)
+        assert len(events) == 1
+        call_kwargs = bus.emit.call_args
+        event_type = (
+            call_kwargs[1].get("event_type") or call_kwargs[0][0]
+        )
+        assert event_type == "DecisionRejected"
+
+    def test_emit_events_without_bus_returns_empty(self):
+        from OPERATORS.OpportunityToDecision.operator import Operator
+        op = Operator(event_bus=None)
+        result = op.execute("opportunity-no-bus")
+        assert op.emit_events(result) == []
+
+    # --- full cycle ---
+
+    def test_full_cycle_selected_path(self, tmp_path):
+        """validate → execute → persist → emit_events, selected branch."""
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        bus = MagicMock()
+        bus.emit.return_value = {"event_id": "evt-full-001"}
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator(event_bus=bus)
+            entity = "opportunity-full-cycle"
+            assert op.validate(entity) is True
+            result = op.execute(entity, world_state="nominal", objectives="growth")
+            assert result["selected"] is True
+            artifact = op.persist(result)
+            assert artifact.exists()
+            assert artifact.parent.name == "DECISIONS"
+            events = op.emit_events(result)
+            assert len(events) == 1
+        finally:
+            otd_mod.BASE = original_base
+
+    def test_full_cycle_rejected_path(self, tmp_path):
+        """validate → execute → persist → emit_events, rejected branch."""
+        from OPERATORS.OpportunityToDecision import operator as otd_mod
+        original_base = otd_mod.BASE
+        otd_mod.BASE = tmp_path
+        bus = MagicMock()
+        bus.emit.return_value = {"event_id": "evt-full-002"}
+        try:
+            from OPERATORS.OpportunityToDecision.operator import Operator
+            op = Operator(event_bus=bus)
+            entity = "opportunity-full-rejected"
+            assert op.validate(entity) is True
+            result = op.execute(entity)
+            assert result["selected"] is False
+            artifact = op.persist(result)
+            assert artifact.exists()
+            assert artifact.parent.name == "EVIDENCE"
+            events = op.emit_events(result)
+            assert len(events) == 1
+        finally:
+            otd_mod.BASE = original_base
 
 
 # ---------------------------------------------------------------------------
@@ -522,7 +817,6 @@ class TestPipelineLearningToMemoryToReasoning:
         session.memory_loaded is populated end-to-end.
         """
         monkeypatch.chdir(tmp_path)
-        # Patch BASE in MemoryToReasoning so snapshot writes to tmp_path
         from OPERATORS.MemoryToReasoning import operator as mtr_mod
         original_base = mtr_mod.BASE
         mtr_mod.BASE = tmp_path
