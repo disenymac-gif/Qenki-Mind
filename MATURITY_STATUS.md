@@ -89,6 +89,21 @@ by `persist()`, not the internal `execute()` result dict. This contract
 is enforced by `OperatorRunResult` and verified end-to-end in
 `TestPipelineLearningToMemoryToReasoning`. Last updated: 2026-07-16.
 
+### Session Persistence
+Status: **Implemented and test-covered.**
+The `CognitiveEngine` creates, enriches, closes, and persists
+`CognitiveSession` instances as canonical entity Markdown files under
+`SESSIONS/`. A session file captures: Session ID, Trigger, Root Entity,
+World State Snapshot, Objectives Snapshot, Memory Loaded, Operators
+Executed, Events Emitted, Artifacts Created, Start Time, End Time, and
+Final State. Sessions are written by `_persist_session()` via
+`save_entity()` and are round-trip parseable by `load_entity()`. The
+contract is fully test-covered in `tests/test_session_persistence.py`.
+A root-level `engine.py` shim re-exports `CognitiveEngine` (and
+companion types) so that both `from engine import …` and
+`from OPERATORS.engine import …` resolve correctly from the repository
+root. Last updated: 2026-07-16.
+
 ### Operational State
 The organism's capacity to hold and act on its own reasoning-in-progress.
 Case: 2 — Capability canonically supported, topology not defined.
