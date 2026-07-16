@@ -41,19 +41,50 @@ canonical absorption.
 ## Proposed Topology Changes
 No new repository category is canonical merely because an ADR is proposed. Proposed domains remain non-materialized until the corresponding ADR is accepted and absorbed into the canonical architecture.
 
-## Reasoning Parameters
-`REASONING_PARAMETERS/` contains Qenki-Mind's own tunable reasoning
-parameters, owned by their respective organs.
+## Cognitive Pipeline
+`OPERATORS/` contains the six canonical cognitive operators that implement
+the cognitive pipeline: `LearningToMemory`, `MemoryToReasoning`,
+`OpportunityToDecision`, `DecisionToExpression`, `ExpressionToConsequence`,
+`ConsequenceToLearning`. The pipeline engine, session model, operator
+registry, and event bus are defined in `OPERATORS/engine.py` and
+`OPERATORS/registry.py`.
 
-## World State
-`WORLD_STATE/` contains Qenki-Mind's current synthesized understanding of
-its external environment.
+## Reasoners
+`REASONERS/` contains the four cognitive reasoning modules used by
+`OpportunityToDecision`: `EvidenceRanker`, `HypothesisGenerator`,
+`ConfidenceEstimator`, `DecisionSelector`. These are owned by the
+Decision Organ and are not independently invokable outside the pipeline.
 
-## Maintenance
-This document is updated only when repository organization changes —
-categories are added, removed, renamed, or reorganized. Additions,
-removals, renames, version changes, or status changes of files within an
-existing category do not require updating this document.
+## Runtime Artifact Stores
+The following directories are populated at runtime by the cognitive
+pipeline. They are not manually edited.
+
+- `LEARNING/` — Learning entities, input to `LearningToMemory`
+- `MEMORY/` — Memory entities, output of `LearningToMemory`
+- `REASONING_PARAMETERS/` — Reasoning context snapshots, output of `MemoryToReasoning`
+- `EVIDENCE/` — Evidence Set entities, output of `OpportunityToDecision`
+- `DECISIONS/` — Decision entities, output of `OpportunityToDecision` (selected only)
+- `EXPRESSIONS/` — Expression entities, output of `DecisionToExpression`
+- `EVENTS/` — Event records emitted by operators via the event bus
+- `SESSIONS/` — Session records written by the pipeline engine
+- `WORLD_STATE/` — Synthesized world state snapshots
+
+## Test Suite
+`tests/` contains the pytest-based test suite for the cognitive pipeline.
+Covers all six operators with full execute/persist/emit cycles, the
+pipeline integration contract, and the REASONERS integration contract.
+
+## Reasoning Parameters (tunable)
+`REASONING_PARAMETERS/` also contains manually authored parameter files
+(e.g., `belief_fact_promotion.md`, `consequence_resolution.md`) that
+tune reasoning behaviour. These coexist with runtime-generated context
+snapshots in the same directory.
+
+## Shared Libraries
+`entity_markdown.py` — canonical entity serialisation/deserialisation
+library used by all operators and tests.
+`prediction_representation.py` — prediction state machine and parsing.
+`qcontext.py` — context assembly utilities.
 
 ## Validation Protocol
 `VALIDATION_PROTOCOL.md` is the experimental protocol for attempting to refute the meta-model, not part of the meta-model itself.
@@ -74,4 +105,10 @@ existing category do not require updating this document.
 `ARTIFACT_BASE_CONTRACT_DERIVED_SPEC.md` is a non-normative, mechanically derivable specification of the Artifact base contract. It introduces no new semantics.
 
 ## Archive
-`_archive/` contains superseded legacy documents (ARTIFACT_CAPABILITIES.md, ARTIFACT_CATALOG.md, ARTIFACT_MODELS.md, ARTIFACT_META_MODEL.md, ARTIFACT_SCHEMA.md), retained for history but not part of the frozen standard.
+`_archive/` contains superseded legacy documents, retained for history but not part of the frozen standard.
+
+## Maintenance
+This document is updated only when repository organization changes —
+categories are added, removed, renamed, or reorganized. Additions,
+removals, renames, version changes, or status changes of files within an
+existing category do not require updating this document.

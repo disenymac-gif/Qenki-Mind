@@ -68,16 +68,39 @@ QENKI_MIND_GOVERNANCE_RULES_v1.md:
    topology can be assessed until the canonical documents are
    re-examined or revised.
 
+### Cognitive Pipeline
+Status: **Implemented and test-covered.**
+All six canonical cognitive operators are fully implemented:
+`LearningToMemory`, `MemoryToReasoning`, `OpportunityToDecision`,
+`DecisionToExpression`, `ExpressionToConsequence`, `ConsequenceToLearning`.
+The pipeline engine (`CognitiveEngine`), session model (`CognitiveSession`),
+operator registry, and event bus are operational. The REASONERS subsystem
+(`EvidenceRanker`, `HypothesisGenerator`, `ConfidenceEstimator`,
+`DecisionSelector`) is certified and integrated. The full test suite
+covers all operators with execute/persist/emit cycles, pipeline
+integration, and REASONERS contract. Last updated: 2026-07-16.
+
 ### Operational State
 The organism's capacity to hold and act on its own reasoning-in-progress.
 Case: 2 — Capability canonically supported, topology not defined.
-Status: No repository domain has currently been materialized in the repository under the Repository Topology Derivation principle defined in QENKI_MIND_GOVERNANCE_RULES_v1.md. This capability is architecturally scoped in the canonical documents as a conceptual capacity rather than a persistent repository domain; its maturity cannot yet be assessed until any corresponding topology is explicitly defined.
+Status: No repository domain has currently been materialized in the
+repository under the Repository Topology Derivation principle defined in
+QENKI_MIND_GOVERNANCE_RULES_v1.md. This capability is architecturally
+scoped in the canonical documents as a conceptual capacity rather than a
+persistent repository domain; its maturity cannot yet be assessed until
+any corresponding topology is explicitly defined.
 
 ### Persistent Knowledge
 The organism's capacity to retain canonical memory and permanent records
 across cycles.
 Case: 2 — Capability canonically supported, topology not defined.
-Status: No repository domain has currently been materialized in the repository under the Repository Topology Derivation principle defined in QENKI_MIND_GOVERNANCE_RULES_v1.md. The Ontology establishes that Facts are semantically permanent once promoted, and architectural responsibilities for persistent records are defined by the canonical documents and ADRs, but any concrete repository topology remains intentionally deferred until explicitly declared.
+Status: No repository domain has currently been materialized in the
+repository under the Repository Topology Derivation principle defined in
+QENKI_MIND_GOVERNANCE_RULES_v1.md. The Ontology establishes that Facts
+are semantically permanent once promoted, and architectural
+responsibilities for persistent records are defined by the canonical
+documents and ADRs, but any concrete repository topology remains
+intentionally deferred until explicitly declared.
 
 ### Supporting Infrastructure
 The organism's capacity to monitor its own health, retain a trace of its
