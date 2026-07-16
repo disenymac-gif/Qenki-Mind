@@ -85,6 +85,13 @@ snapshots in the same directory.
 library used by all operators and tests.
 `prediction_representation.py` — prediction state machine and parsing.
 `qcontext.py` — context assembly utilities.
+`engine.py` — root-level shim re-exporting `CognitiveEngine` and companion
+types from `OPERATORS/engine.py` for bare-import compatibility.
+
+## Project State
+`PROJECT_STATE.md` — single-file operational snapshot of the project.
+Read this file first when starting a new session. Updated in the same
+commit as each relevant implementation.
 
 ## Validation Protocol
 `VALIDATION_PROTOCOL.md` is the experimental protocol for attempting to refute the meta-model, not part of the meta-model itself.
