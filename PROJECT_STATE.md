@@ -10,7 +10,7 @@ main
 6add39f4480a6c81e621de5ad936b69e1a7c6d6b
 
 ## Last Updated
-2026-07-16
+2026-07-17
 
 ## Current Architecture
 Nine ADRs total. ADR-001 through ADR-009 all Closed. Six canonical
@@ -35,6 +35,8 @@ and `REPOSITORY_MAP.md`.
   `tests/test_belief_to_fact.py`, `tests/test_evidence_to_belief_update.py`,
   `tests/test_belief_regression.py`, `tests/test_belief_archival.py`,
   `tests/test_belief_conflict_resolution.py`
+- **`tests/test_integration_e2e.py`**: Integration Scaffold — end-to-end
+  pipeline across all 12 operators (Frontera 3 complete)
 - `BELIEFS/` runtime artifact store: persistent epistemic layer (ADR-007/ADR-008)
 - `FACTS/` runtime artifact store: Fact domain materialized (ADR-001 + ADR-008)
 - `EPISTEMIC_EVIDENCE/` runtime artifact store: epistemic Evidence schema
@@ -81,8 +83,8 @@ and `REPOSITORY_MAP.md`.
   undefined by their owning domains.
 
 ## Current Bottleneck
-The full Belief lifecycle is now implemented and test-covered across all
-12 operators. No remaining operator is blocked.
+Frontera 3 (Integration Scaffold) is complete. All 12 operators are
+covered by `tests/test_integration_e2e.py`.
 
 The next meaningful development frontier is one of the following. Owner
 confirmation required to select the direction:
@@ -95,21 +97,21 @@ confirmation required to select the direction:
    domain, distinct from `BELIEFS/` and `FACTS/`. Requires an ADR to
    distinguish this domain from the epistemic layer already in place.
 
-3. **Integration scaffold**: Wire all 12 operators into an end-to-end
-   `CognitiveSession` integration test that covers the full pipeline
-   from `LearningToMemory` through `BeliefConflictResolution`, using
-   real fixture files for all intermediate artifact types.
-
-4. **`MATURITY_STATUS.md` update**: The current maturity file may be
+3. **`MATURITY_STATUS.md` update**: The current maturity file may be
    stale relative to the 12 implemented operators and 9 ADRs. A
    consistency pass would bring it in sync.
 
-All four are unblocked. Awaiting owner direction.
+All three are unblocked. Awaiting owner direction.
 
 ## Blocked Decisions
 None.
 
 ## Recent Decisions
+- **2026-07-17** — Frontera 3 complete. Integration Scaffold implemented:
+  `tests/test_integration_e2e.py` covers all 12 operators in three
+  test classes (cognitive tramo E2E, epistemic tramo E2E, full 12-operator
+  pipeline). Fixture strategy: real entity_markdown files, monkeypatch.chdir,
+  mod.BASE = tmp_path pattern (canonical). No defects detected.
 - **2026-07-16** — ADR-009 opened and closed. `BeliefConflictResolution`
   implemented and test-covered (30 tests). Full Belief lifecycle complete.
   12 operators total. All epistemic lifecycle operators operational.
