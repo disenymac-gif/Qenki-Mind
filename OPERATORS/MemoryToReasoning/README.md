@@ -36,3 +36,23 @@ value). This makes Memory content available to `EvidenceRanker` in
   operator does not silently produce an empty reasoning context.
 
 ## Pipeline Position
+
+```
+LearningToMemory → [MEMORY/*.md] → MemoryToReasoning → [REASONING_PARAMETERS/reasoning-context-*.md]
+                                                       ↓ session.memory_loaded
+                                          OpportunityToDecision → EvidenceRanker
+```
+
+## Events Emitted
+`MemoryProjected` — carries `projected_items_count` and `session_id`.
+
+## Architectural Notes
+- Traceability per ADR-008 invariant 5: every projection is persisted as a
+  dated snapshot with full provenance (`Canonical Basis`, `Change History`).
+- ADR-008 status is `Proposed`; this operator pre-materializes the
+  Memory→Reasoning pathway without creating a `BELIEFS/` domain, which
+  requires accepted ADR-008 before it can exist in topology.
+- The snapshot’s `Current State: Active` means it is the current operative
+  context for the session that produced it. Multiple snapshots may coexist
+  in `REASONING_PARAMETERS/` — one per Memory source, timestamped in
+  `Change History`.
