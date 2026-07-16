@@ -19,6 +19,19 @@ Perception (continuous) -> Sense-Making (triggered) -> Opportunity
 optional) -> Learning & Reflection (continuous daily calibration; periodic
 weekly/monthly/quarterly reflection).
 
+**Epistemic feedback path (binding, from ADR-008):** Learning & Reflection
+operates a persistent epistemic layer as a first-class component of the
+cognitive loop. After each calibration cycle, Learning & Reflection may
+enact Belief revisions inside this layer. These revisions are available to
+all subsequent Sense-Making, Opportunity, and Decision cycles, enabling
+learning to change future reasoning through Belief state — not only
+through historical records. The epistemic feedback path is architecturally
+distinct from Memory, Evidence, World State, and Consequence: it
+represents the organism's current internal claims about what is believed to
+be true beyond direct observation, with explicit confidence and revision
+history. No organ other than Learning & Reflection may enact changes to
+this layer.
+
 ## Perception to Sense-Making Boundary
 
 **Binding invariant (from ADR-006):** Each Sense-Making cycle operates on
@@ -60,18 +73,21 @@ passively without escalating to conscious attention.
 
 ### Daily
 The full loop: listen, interpret, weigh, decide, express (if warranted),
-calibrate, consolidate.
+calibrate, consolidate. Learning & Reflection may enact Belief revisions
+inside the persistent epistemic layer after the daily calibration pass.
 
 ### Weekly
 Learning & Reflection reviews patterns across the week's Decisions and
 Learning events, including any predictions that reached terminal
 "unresolved — no data received" status per the Consequence Contract
-completion rule (ADR-004).
+completion rule (ADR-004). Belief revision and conflict resolution in the
+epistemic layer may be enacted at this rhythm.
 
 ### Monthly
 Deeper reflection; proposed Mental Model or Decision Policy revisions
 surface here, respecting the Mental Model deprecation authority boundary
-(ADR-005).
+(ADR-005). Epistemic layer audit: conflicting or stale Beliefs may be
+explicitly resolved or archived by Learning & Reflection.
 
 ### Quarterly
 Deepest review; proposed Philosophy or Objectives revisions, always
@@ -81,11 +97,8 @@ routed through Human Review, never self-applied.
 - ADR-002: Insight Handoff Authority — Status: Closed
 - ADR-003: Critic Rejection Semantics — Status: Closed
 - ADR-006: Observation Snapshot Semantics — Status: Closed
+- ADR-008: Persistent Epistemic Layer — Status: Accepted and absorbed
 
 ## Relationships
 Consulted alongside QENKI_MIND_ORGANS_v1.md and
 QENKI_MIND_ONTOLOGY_v1.md.
-
-
-## Persistent Epistemic Layer
-An architectural decision introduced by ADR-008: Qenki-Mind maintains exactly one authority authorized to produce transitions of the epistemic state, while the concrete persistence substrate remains an implementation concern.

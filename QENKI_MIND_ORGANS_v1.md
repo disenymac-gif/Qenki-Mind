@@ -44,6 +44,12 @@ operates on a fixed snapshot of the Observation Inbox taken at the moment
 the cycle is triggered. Observations arriving after that moment are
 deferred to the next cycle.
 
+**Epistemic proposal boundary (binding, from ADR-008):** Sense-Making may
+produce Beliefs as new epistemic objects, but creation of a Belief's
+authoritative entry in the persistent epistemic layer requires Learning &
+Reflection to enact it. Sense-Making’s formed Beliefs are proposals until
+acted upon by the owning organ.
+
 ### Opportunity Organ
 Mission: score Insights against World State and Objectives to produce
 ranked Opportunities.
@@ -53,9 +59,20 @@ organ with authority to determine opportunity relevance. It evaluates
 every Insight that reaches it and is never required to reconstruct or
 rediscover Insights withheld upstream by Sense-Making.
 
+**Epistemic consumption boundary (binding, from ADR-008):** Opportunity
+may consume Beliefs from the persistent epistemic layer to inform
+opportunity scoring, but may not authoritatively mutate the epistemic
+layer. Opportunity may propose Belief creation or revision as a side
+effect of its evaluation, but such proposals take effect only once
+Learning & Reflection acts on them.
+
 ### Decision Organ
 Mission: resolve ranked Opportunities into committed Decisions, checked
 against the Constitution and Decision Policies.
+
+**Epistemic consumption boundary (binding, from ADR-008):** Decision may
+consume Beliefs from the persistent epistemic layer to inform committed
+Decisions, but may not authoritatively mutate the epistemic layer.
 
 ### Expression Organ
 Mission: translate committed Decisions into externalized artifacts,
@@ -75,8 +92,9 @@ is permanently recorded in the Critic's critique log. Rejection never
 results in silent loss.
 
 ### Learning & Reflection Organ
-Mission: compare predictions against outcomes, recalibrate confidence, and
-produce periodic Reflection at weekly, monthly, and quarterly rhythms.
+Mission: compare predictions against outcomes, recalibrate confidence,
+revise Beliefs in the persistent epistemic layer, and produce periodic
+Reflection at weekly, monthly, and quarterly rhythms.
 
 **Ownership boundary (binding, from ADR-001):** Learning & Reflection is
 the sole owner of the Belief-to-Fact promotion confidence threshold and
@@ -94,17 +112,25 @@ the sole authority permitted to deprecate or reinstate a Mental Model,
 based on accumulated performance. This authority may not be exercised by
 any other organ.
 
+**Epistemic layer ownership (binding, from ADR-008):** Learning &
+Reflection is the sole organ authorized to enact any change to a Belief's
+authoritative state in the persistent epistemic layer: creation, confidence
+revision, promotion to Fact, regression from Fact to Belief, archival, and
+conflict resolution. Other organs may consume Beliefs and may propose
+creation or revision through their own artifacts; such proposals take effect
+only once Learning & Reflection acts on them. Proposal and authority are
+permanently distinct. This ownership is not bounded by any specific
+persistence substrate; it applies regardless of whether the layer is
+materialized as a repository directory, a datastore, or another form.
+
 ## Architectural Decisions Incorporated
 - ADR-001: Belief to Fact Promotion Invariant — Status: Closed
 - ADR-002: Insight Handoff Authority — Status: Closed
 - ADR-003: Critic Rejection Semantics — Status: Closed
 - ADR-004: Consequence Contract Completion Semantics — Status: Closed
 - ADR-005: Mental Model Deprecation Authority — Status: Closed
+- ADR-008: Persistent Epistemic Layer — Status: Accepted and absorbed
 
 ## Relationships
 Consulted alongside QENKI_MIND_ONTOLOGY_v1.md and
 QENKI_MIND_COGNITIVE_ARCHITECTURE_v1.md.
-
-
-## Persistent Epistemic Layer Ownership
-Learning & Reflection currently implements the authority authorized to produce transitions of the epistemic state. This is an implementation of the ADR-defined invariant, not the invariant itself.

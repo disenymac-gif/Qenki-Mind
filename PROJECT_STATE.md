@@ -7,17 +7,16 @@ disenymac-gif/Qenki-Mind
 main
 
 ## Baseline Commit
-2653706620987b258915467f690877745a8dc758
+6add39f4480a6c81e621de5ad936b69e1a7c6d6b
 
 ## Last Updated
 2026-07-16
 
 ## Current Architecture
-Six canonical documents (frozen, Governance Rules v1, Cognitive
-Architecture v1, Ontology v1, Organs v1, Cognitive Contract Layer v1,
-Interface Boundary Specification v1). Seven ADRs absorbed (ADR-001
-through ADR-007). ADR-008 pending (see Blocked Decisions).
-Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md` and `REPOSITORY_MAP.md`.
+Eight ADRs total. ADR-001 through ADR-007 absorbed. ADR-008 accepted and
+absorbed into ONTOLOGY_v1, ORGANS_v1, and COGNITIVE_ARCHITECTURE_v1.
+Six canonical documents frozen. Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md`
+and `REPOSITORY_MAP.md`.
 
 ## Implemented
 - Cognitive pipeline: 6 canonical operators
@@ -32,12 +31,15 @@ Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md` and `REPOSITORY_MAP.md`.
 - `engine.py` root shim: re-exports `CognitiveEngine` et al. from `OPERATORS/engine.py`
 - Full test suite: `tests/test_operators.py`, `tests/test_opportunity_to_decision.py`,
   `tests/test_session_persistence.py`
+- ADR-008 accepted and absorbed: persistent epistemic layer is now an
+  architectural invariant across ONTOLOGY_v1, ORGANS_v1, COGNITIVE_ARCHITECTURE_v1
 - `PROJECT_STATE.md` (this document)
 
 ## Open Work
-- ADR-008 requires acceptance and absorption into three canonical documents
-  (`ONTOLOGY`, `ORGANS`, `COGNITIVE_ARCHITECTURE`) before the persistent
-  epistemic layer (`BELIEFS/` or equivalent) can be materialized.
+- Persistent epistemic layer topology: `BELIEFS/` domain (or equivalent
+  substrate) not yet materialized. ADR-008 is accepted; materialization
+  requires an explicit topology decision per the Repository Topology
+  Derivation principle (ADR-007 / Governance Rules).
 - `Operational State` capability: canonically supported, topology not yet defined.
 - `Persistent Knowledge` capability: canonically supported, topology not yet defined.
 - `Supporting Infrastructure` capability: no canonical basis identified yet.
@@ -46,30 +48,35 @@ Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md` and `REPOSITORY_MAP.md`.
   undefined by their owning domains.
 
 ## Current Bottleneck
-ADR-008 (`Persistent Epistemic Layer`) is Proposed but not yet Accepted.
-No Belief persistence, epistemic layer materialization, or canonical
-document updates for `ONTOLOGY`, `ORGANS`, or `COGNITIVE_ARCHITECTURE`
-can proceed until this ADR is resolved.
+Persistent epistemic layer topology is not yet materialized. ADR-008 has
+been accepted and absorbed into the canonical documents, but the `BELIEFS/`
+domain (or chosen substrate) must now be explicitly declared under ADR-007
+before any Belief persistence operators can be implemented.
 
 ## Blocked Decisions
-- **ADR-008** — Proposed. Blocks: epistemic layer topology, `BELIEFS/`
-  domain, Belief lifecycle operators, and canonical document absorption
-  into `ONTOLOGY_v1`, `ORGANS_v1`, `COGNITIVE_ARCHITECTURE_v1`.
-  File: `ADR/QENKI_MIND_ADR_008_PERSISTENT_EPISTEMIC_LAYER_v1.md`
+- **Epistemic topology materialization** — No blocker at ADR level. The
+  topology decision (`BELIEFS/` directory, separate datastore, or other
+  form) must be taken explicitly under the Repository Topology Derivation
+  principle (ADR-007). Once declared, Belief operators and persistence can
+  be implemented.
 
 ## Recent Decisions
+- **2026-07-16** — ADR-008 accepted and absorbed. ONTOLOGY_v1 updated
+  with Belief epistemic invariants and Learning epistemic feedback.
+  ORGANS_v1 updated with authority boundaries for all organs re: epistemic
+  layer. COGNITIVE_ARCHITECTURE_v1 updated with epistemic feedback path
+  and rhythm-level epistemic actions.
+- **2026-07-16** — `PROJECT_STATE.md` introduced as single-file
+  operational context snapshot. Updated in same commit as each
+  relevant implementation.
 - **2026-07-16** — Session persistence implemented and test-covered.
-  `CognitiveEngine._persist_session()` writes session files to `SESSIONS/`.
-  Test: `tests/test_session_persistence.py`. Commit: `265370662`.
-- **2026-07-16** — Root-level `engine.py` shim added to resolve bare
-  `from engine import CognitiveEngine` import in test suite. Commit: `265370662`.
-- **2026-07-16** — `MATURITY_STATUS.md` updated: Session Persistence
-  marked Implemented and test-covered.
+- **2026-07-16** — Root-level `engine.py` shim added.
 
 ## Next Iteration
-Accept and absorb ADR-008 into the three affected canonical documents
-(`ONTOLOGY_v1`, `ORGANS_v1`, `COGNITIVE_ARCHITECTURE_v1`), then
-materialize the persistent epistemic layer topology.
+Declare the persistent epistemic layer topology under ADR-007
+(e.g., `BELIEFS/` directory as a runtime artifact store), then implement
+the Belief entity schema and the first Belief-lifecycle operator
+(`LearningToBelief` or equivalent).
 
 ## Working Contract
 - Branch: `main`. All work committed directly to `main`.

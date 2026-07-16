@@ -1,7 +1,7 @@
 # ADR 008: Persistent Epistemic Layer
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 The canonical Ontology defines Belief, Fact, Hypothesis, Evidence, and

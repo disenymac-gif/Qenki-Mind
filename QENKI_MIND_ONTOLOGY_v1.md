@@ -41,8 +41,39 @@ Becomes Hypothesis or resolves directly into Insight.
 An Observation formally linked to a claim it supports or challenges.
 Created by the Sense-Making Organ. Permanent, immutable once created.
 
+### Belief
+A claim held with meaningful but not absolute confidence. Belief is a
+first-class persistent epistemic entity stored in the persistent epistemic
+layer owned by the Learning & Reflection Organ — not merely an implicit
+view materialized from Memory, Evidence, Decision, or World State.
+
+**Epistemic Layer Invariants (binding, from ADR-008):**
+- Qenki-Mind maintains exactly one authoritative persistent epistemic layer
+  for Beliefs and related lifecycle state.
+- Learning & Reflection is the sole organ authorized to enact any change
+  to a Belief's authoritative state: creation, confidence revision,
+  promotion to Fact, regression from Fact, archival, and conflict
+  resolution. Other organs may propose creation or revision; proposal and
+  authority are permanently distinct.
+- Every authoritative Belief state change must be traceable to supporting
+  and/or contradicting Evidence, Learning, or Reflection inputs.
+- A Belief may exist with incomplete Evidence, but its confidence and
+  revision history must make that epistemic incompleteness explicit.
+- Conflicting Beliefs may coexist transiently only if the conflict is
+  explicitly represented and unresolved; no implementation may silently
+  collapse conflict by deletion or overwrite.
+- Belief archival never erases epistemic history; inactive or superseded
+  Beliefs remain permanently retrievable.
+- Decisions may consume the persistent epistemic layer but may not
+  authoritatively mutate it.
+
+A Belief becomes Fact (see Promotion Invariant below), Insight,
+or is archived upon disconfirmation.
+
 ### Fact
-A claim considered settled beyond reasonable doubt. Fact is a conceptual cognitive object; repository topology and persistent epistemic-layer materialization are decided elsewhere.
+A claim considered settled beyond reasonable doubt. Fact is a first-class
+epistemic object residing inside the persistent epistemic layer; promotion
+and regression occur inside that layer, not outside it.
 
 **Promotion Invariant (binding, from ADR-001):** A Belief promotes to
 Fact if and only if independently-sourced Evidence converges above a
@@ -51,14 +82,11 @@ tunable Reasoning Parameter. A Fact always represents strictly higher
 epistemic commitment than a Belief; no implementation may allow a Fact to
 carry equal or lower confidence than an unpromoted Belief. A Fact remains
 reversible: it regresses to Belief upon the arrival of contradicting
-Evidence. Promotion may never occur from volume alone, elapsed time, or
-absence of disconfirmation — only from convergent, independent Evidence
-crossing the owned threshold.
-
-### Belief
-A claim held with meaningful but not absolute confidence. Created by the
-Sense-Making Organ. Becomes Fact (see Promotion Invariant above), Insight,
-or is discarded upon disconfirmation.
+Evidence, with the regression enacted inside the persistent epistemic layer
+by Learning & Reflection (binding, from ADR-008, Invariant 7). Promotion
+may never occur from volume alone, elapsed time, or absence of
+disconfirmation — only from convergent, independent Evidence crossing the
+owned threshold.
 
 ### Hypothesis
 A proposed but untested explanation. Created by the Sense-Making Organ.
@@ -116,7 +144,10 @@ Expression Organ. Permanent record once released.
 
 ### Learning
 An update produced by comparing a prediction against an actual outcome.
-Created by the Learning & Reflection Organ. Learning is a conceptual cognitive object; repository topology and persistent epistemic-layer materialization are decided elsewhere.
+Created by the Learning & Reflection Organ. Learning is a first-class
+cognitive object; it feeds Belief revision inside the persistent epistemic
+layer (binding, from ADR-008) and may trigger promotion, regression, or
+archival of Beliefs.
 
 **Terminal State Invariant (binding, from ADR-004):** Every prediction
 tied to a Decision or Expression must eventually reach a terminal state.
@@ -153,6 +184,7 @@ is discarded.
 - ADR-002: Insight Handoff Authority — Status: Closed
 - ADR-005: Mental Model Deprecation Authority — Status: Closed
 - ADR-006: Observation Snapshot Semantics — Status: Closed
+- ADR-008: Persistent Epistemic Layer — Status: Accepted and absorbed
 
 ## Relationships
 Consumed by every organ. Consulted alongside QENKI_MIND_ORGANS_v1.md and
