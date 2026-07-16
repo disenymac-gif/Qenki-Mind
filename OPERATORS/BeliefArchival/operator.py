@@ -31,6 +31,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from OPERATORS.engine import CognitiveOperator
+from OPERATORS._belief_utils import derive_fact_path
 import entity_markdown as em
 
 
@@ -79,7 +80,7 @@ class Operator(CognitiveOperator):
     def execute(self, belief_path, **kwargs):
         """Build updated Belief and optional updated Fact sections."""
         belief_path_obj = Path(belief_path)
-        fact_path = _derive_fact_path(belief_path)
+        fact_path = derive_fact_path(belief_path)
         has_fact = fact_path.exists()
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -154,17 +155,3 @@ class Operator(CognitiveOperator):
                 )
             )
         return events
-
-
-# ---------------------------------------------------------------------------
-# Internal helper
-# ---------------------------------------------------------------------------
-
-def _derive_fact_path(belief_path) -> Path:
-    """Derive the canonical Fact path from a Belief path.
-
-    Convention (ADR-001 + ADR-008):
-        BELIEFS/<stem>.md  ->  FACTS/fact-<stem>.md
-    """
-    stem = Path(belief_path).stem
-    return Path("FACTS") / f"fact-{stem}.md"

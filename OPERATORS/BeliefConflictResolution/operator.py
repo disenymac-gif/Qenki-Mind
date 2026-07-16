@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from OPERATORS.engine import CognitiveOperator
+from OPERATORS._belief_utils import parse_float, load_promotion_threshold
 import entity_markdown as em
 
 
@@ -39,8 +40,6 @@ import entity_markdown as em
 # Constants
 # ---------------------------------------------------------------------------
 
-PROMOTION_THRESHOLD_DEFAULT: float = 0.80
-PARAMETER_FILE = Path("REASONING_PARAMETERS") / "belief_fact_promotion.md"
 CONFIDENCE_MIN: float = 0.0
 CONFIDENCE_MAX: float = 1.0
 
@@ -91,7 +90,7 @@ class Operator(CognitiveOperator):
         """Re-evaluate net confidence; build updated Belief sections."""
         belief_path_obj = Path(belief_path)
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        threshold = _load_threshold()
+        threshold = load_promotion_threshold()
 
         belief_sections = em.load_entity(belief_path_obj)
         supporting_refs = _parse_evidence_refs(
@@ -162,7 +161,7 @@ class Operator(CognitiveOperator):
 
 
 # ---------------------------------------------------------------------------
-# Internal helpers
+# Internal helpers (operator-local, not candidates for _belief_utils)
 # ---------------------------------------------------------------------------
 
 def _parse_evidence_refs(section_value: str) -> list[str]:
@@ -195,7 +194,7 @@ def _sum_applied_strengths(evidence_refs: list[str]) -> float:
             state = sections.get("Current State", "").strip()
             if state != "Applied":
                 continue
-            total += _parse_float(sections.get("Strength", "0.0"))
+            total += parse_float(sections.get("Strength", "0.0"))
         except Exception:
             continue
     return total
@@ -203,28 +202,3 @@ def _sum_applied_strengths(evidence_refs: list[str]) -> float:
 
 def _clamp(value: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, value))
-
-
-def _parse_float(value: str) -> float:
-    try:
-        return float(str(value).strip())
-    except (ValueError, TypeError):
-        return 0.0
-
-
-def _load_threshold() -> float:
-    """Read promotion_threshold from belief_fact_promotion.md."""
-    try:
-        sections = em.load_entity(PARAMETER_FILE)
-        current_value = sections.get("Current Value", "")
-        for line in current_value.splitlines():
-            stripped = line.strip()
-            try:
-                candidate = float(stripped)
-                if 0.0 < candidate <= 1.0:
-                    return candidate
-            except ValueError:
-                continue
-    except Exception:
-        pass
-    return PROMOTION_THRESHOLD_DEFAULT

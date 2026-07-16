@@ -33,15 +33,15 @@ from pathlib import Path
 from typing import Optional
 
 from OPERATORS.engine import CognitiveOperator
+from OPERATORS._belief_utils import parse_float, load_promotion_threshold
 import entity_markdown as em
 
 
 # ---------------------------------------------------------------------------
-# Sentinel and defaults
+# Convenience alias — keeps operator-level code readable
 # ---------------------------------------------------------------------------
 
 PROMOTION_THRESHOLD_DEFAULT: float = 0.80
-PARAMETER_FILE = Path("REASONING_PARAMETERS") / "belief_fact_promotion.md"
 
 
 # ---------------------------------------------------------------------------
@@ -118,8 +118,8 @@ class Operator(CognitiveOperator):
                 f"Resolve conflict before promotion (ADR-008 Invariant 8)."
             )
 
-        confidence = _parse_confidence(sections.get("Confidence", "0.0"))
-        threshold = _load_threshold()
+        confidence = parse_float(sections.get("Confidence", "0.0"))
+        threshold = load_promotion_threshold()
         if confidence < threshold:
             raise BelowPromotionThresholdError(
                 f"Belief at '{belief_path}' has confidence {confidence:.4f}, "
@@ -133,8 +133,8 @@ class Operator(CognitiveOperator):
         belief_path_obj = Path(belief_path)
         fact_id = "fact-" + belief_path_obj.stem
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        threshold = _load_threshold()
-        confidence = _parse_confidence(sections.get("Confidence", "0.0"))
+        threshold = load_promotion_threshold()
+        confidence = parse_float(sections.get("Confidence", "0.0"))
 
         fact_sections = OrderedDict([
             ("Identity", fact_id),
@@ -215,41 +215,3 @@ class Operator(CognitiveOperator):
             str(result["fact_path"]),
         )
         return [event]
-
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-def _parse_confidence(value: str) -> float:
-    """Parse a confidence string to float; return 0.0 on parse failure."""
-    try:
-        return float(str(value).strip())
-    except (ValueError, TypeError):
-        return 0.0
-
-
-def _load_threshold() -> float:
-    """Read promotion_threshold from the canonical parameter file.
-
-    Falls back to PROMOTION_THRESHOLD_DEFAULT if the file is absent,
-    the section is missing, or the value cannot be parsed.
-    """
-    try:
-        sections = em.load_entity(PARAMETER_FILE)
-        param_def = sections.get("Parameter Definition", "")
-        current_value = sections.get("Current Value", "")
-        # Parse the first float-parseable line in Current Value.
-        for line in current_value.splitlines():
-            stripped = line.strip()
-            # Look for a line that is just a float after label prefix.
-            # E.g. "0.80" or "promotion_threshold" header followed by "0.80".
-            try:
-                candidate = float(stripped)
-                if 0.0 < candidate <= 1.0:
-                    return candidate
-            except ValueError:
-                continue
-    except Exception:
-        pass
-    return PROMOTION_THRESHOLD_DEFAULT

@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from OPERATORS.engine import CognitiveOperator
+from OPERATORS._belief_utils import parse_float, load_regression_threshold
 import entity_markdown as em
 
 
@@ -43,8 +44,6 @@ import entity_markdown as em
 # Constants
 # ---------------------------------------------------------------------------
 
-REGRESSION_THRESHOLD_DEFAULT: float = 0.50
-PROMOTION_PARAM_FILE = Path("REASONING_PARAMETERS") / "belief_fact_promotion.md"
 CONFIDENCE_MIN: float = 0.0
 CONFIDENCE_MAX: float = 1.0
 
@@ -118,20 +117,20 @@ class Operator(CognitiveOperator):
         evidence_path_obj = Path(evidence_path)
 
         valence = evidence_sections.get("Valence", "").strip()
-        strength = _parse_float(evidence_sections.get("Strength", "0.10"))
+        strength = parse_float(evidence_sections.get("Strength", "0.10"))
         linked_belief_path = Path(evidence_sections.get("Linked Belief", "").strip())
         evidence_ref = str(evidence_path_obj)
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         belief_sections = em.load_entity(linked_belief_path)
-        old_confidence = _parse_float(belief_sections.get("Confidence", "0.0"))
+        old_confidence = parse_float(belief_sections.get("Confidence", "0.0"))
 
         if valence == "Supporting":
             new_confidence = min(CONFIDENCE_MAX, old_confidence + strength)
         else:  # Contradicting
             new_confidence = max(CONFIDENCE_MIN, old_confidence - strength)
 
-        regression_threshold = _load_regression_threshold()
+        regression_threshold = load_regression_threshold()
         regression_pending = (
             valence == "Contradicting"
             and new_confidence < regression_threshold
@@ -229,40 +228,3 @@ class Operator(CognitiveOperator):
             )
             events.append(evt2)
         return events
-
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-def _parse_float(value: str) -> float:
-    try:
-        return float(str(value).strip())
-    except (ValueError, TypeError):
-        return 0.0
-
-
-def _load_regression_threshold() -> float:
-    """Read regression_threshold from belief_fact_promotion.md.
-
-    Falls back to REGRESSION_THRESHOLD_DEFAULT if absent or unparseable.
-    """
-    try:
-        sections = em.load_entity(PROMOTION_PARAM_FILE)
-        current_value = sections.get("Current Value", "")
-        # Scan for a line headed '### regression_threshold' followed by a float.
-        lines = current_value.splitlines()
-        for i, line in enumerate(lines):
-            if "regression_threshold" in line.lower():
-                for subsequent in lines[i + 1:]:
-                    stripped = subsequent.strip()
-                    try:
-                        candidate = float(stripped)
-                        if 0.0 < candidate <= 1.0:
-                            return candidate
-                    except ValueError:
-                        if stripped:
-                            break
-    except Exception:
-        pass
-    return REGRESSION_THRESHOLD_DEFAULT
