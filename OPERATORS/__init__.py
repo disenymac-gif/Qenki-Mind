@@ -9,10 +9,9 @@ from .ExpressionToConsequence.operator import Operator as ExpressionToConsequenc
 from .ConsequenceToLearning.operator import Operator as ConsequenceToLearning
 from .LearningToBelief.operator import Operator as LearningToBelief
 from .BeliefToFact.operator import Operator as BeliefToFact
+from .EvidenceToBeliefUpdate.operator import Operator as EvidenceToBeliefUpdate
 
-# Pre-built registry with all eight canonical operators registered.
-# Pass this to CognitiveEngine(registry=default_registry) or use
-# build_engine() to get a ready-to-run engine instance.
+# Pre-built registry with all nine canonical operators registered.
 default_registry = OperatorRegistry()
 default_registry.register("LearningToMemory",        LearningToMemory)
 default_registry.register("MemoryToReasoning",       MemoryToReasoning)
@@ -22,22 +21,20 @@ default_registry.register("ExpressionToConsequence", ExpressionToConsequence)
 default_registry.register("ConsequenceToLearning",   ConsequenceToLearning)
 default_registry.register("LearningToBelief",        LearningToBelief)
 default_registry.register("BeliefToFact",            BeliefToFact)
+default_registry.register("EvidenceToBeliefUpdate",  EvidenceToBeliefUpdate)
 
 
 def build_engine(event_bus=None):
     """
-    Returns a CognitiveEngine pre-loaded with all eight canonical operators.
+    Returns a CognitiveEngine pre-loaded with all nine canonical operators.
 
     Usage:
         from OPERATORS import build_engine
         engine = build_engine()
-        session = engine.start_session(trigger="manual", root_entity="LEARNING/example.md")
-        result  = engine.run_pipeline(
-            entity="LEARNING/example.md",
-            pipeline=[
-                "LearningToMemory",
-                "LearningToBelief",
-            ],
+        session = engine.start_session(trigger="manual", root_entity="BELIEFS/belief-x.md")
+        artifact = engine.run(
+            "EvidenceToBeliefUpdate",
+            "EPISTEMIC_EVIDENCE/evidence-x.md",
             session=session,
         )
     """
