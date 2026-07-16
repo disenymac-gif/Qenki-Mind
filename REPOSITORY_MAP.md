@@ -49,13 +49,22 @@ the cognitive pipeline: `LearningToMemory`, `MemoryToReasoning`,
 registry, and event bus are defined in `OPERATORS/engine.py` and
 `OPERATORS/registry.py`.
 
+## Epistemic Operators
+`OPERATORS/` also contains the six epistemic lifecycle operators defined
+by ADR-007, ADR-008, and ADR-009:
+`LearningToBelief`, `BeliefToFact`, `EvidenceToBeliefUpdate`,
+`BeliefRegression`, `BeliefArchival`, `BeliefConflictResolution`.
+These operators manage the full Belief lifecycle (Active → Promoted →
+Regressed → Conflicted → Active → Archived) and the Fact domain.
+They are independently invokable within the pipeline.
+
 ## Reasoners
 `REASONERS/` contains the four cognitive reasoning modules used by
 `OpportunityToDecision`: `EvidenceRanker`, `HypothesisGenerator`,
 `ConfidenceEstimator`, `DecisionSelector`. These are owned by the
 Decision Organ and are not independently invokable outside the pipeline.
 
-## Runtime Artifact Stores
+## Runtime Artifact Stores — Core Pipeline
 The following directories are populated at runtime by the cognitive
 pipeline. They are not manually edited.
 
@@ -69,16 +78,43 @@ pipeline. They are not manually edited.
 - `SESSIONS/` — Session records written by the pipeline engine
 - `WORLD_STATE/` — Synthesized world state snapshots
 
+## Runtime Artifact Stores — Epistemic Layer
+The following directories are materialized by the epistemic operators
+(ADR-007, ADR-008, ADR-009). They are not manually edited.
+
+- `BELIEFS/` — Belief entities at all lifecycle stages (Active, Promoted,
+  Regressed, Conflicted, Archived)
+- `FACTS/` — Fact entities; semantically permanent once promoted from a
+  Belief (idempotent creation enforced)
+- `EPISTEMIC_EVIDENCE/` — Evidence entities consumed by
+  `EvidenceToBeliefUpdate` to adjust Belief confidence
+
 ## Test Suite
-`tests/` contains the pytest-based test suite for the cognitive pipeline.
-Covers all six operators with full execute/persist/emit cycles, the
-pipeline integration contract, and the REASONERS integration contract.
+`tests/` contains the pytest-based test suite covering all twelve
+operators, the pipeline engine, session persistence, and the full
+Integration Scaffold.
+
+- `tests/test_operators.py` — six core pipeline operators
+- `tests/test_opportunity_to_decision.py` — REASONERS integration
+- `tests/test_session_persistence.py` — session model and persistence
+- `tests/test_learning_to_belief.py` — LearningToBelief operator
+- `tests/test_belief_to_fact.py` — BeliefToFact operator
+- `tests/test_evidence_to_belief_update.py` — EvidenceToBeliefUpdate operator
+- `tests/test_belief_regression.py` — BeliefRegression operator
+- `tests/test_belief_archival.py` — BeliefArchival operator
+- `tests/test_belief_conflict_resolution.py` — BeliefConflictResolution operator
+- `tests/test_integration_e2e.py` — Integration Scaffold: end-to-end
+  pipeline across all 12 operators (cognitive tramo E2E, epistemic tramo
+  E2E, full 12-operator pipeline)
 
 ## Reasoning Parameters (tunable)
 `REASONING_PARAMETERS/` also contains manually authored parameter files
-(e.g., `belief_fact_promotion.md`, `consequence_resolution.md`) that
-tune reasoning behaviour. These coexist with runtime-generated context
-snapshots in the same directory.
+that tune reasoning behaviour:
+- `belief_fact_promotion.md` — promotion threshold (0.80), minimum
+  independent sources (1), regression threshold (0.50)
+- `consequence_resolution.md` — consequence resolution parameters
+
+These coexist with runtime-generated context snapshots in the same directory.
 
 ## Shared Libraries
 `entity_markdown.py` — canonical entity serialisation/deserialisation

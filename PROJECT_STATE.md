@@ -73,6 +73,14 @@ and `REPOSITORY_MAP.md`.
   (`promotion_threshold: 0.80`; `minimum_independent_sources: 1`;
   `regression_threshold: 0.50`)
 - `PROJECT_STATE.md` (this document)
+- **`MATURITY_STATUS.md`** — consistency pass complete (2026-07-17):
+  updated to 9 ADRs all Closed, Epistemic Layer section added
+  (Implemented and test-covered), Cognitive Pipeline section updated
+  to reflect all 12 operators and Integration Scaffold
+- **`REPOSITORY_MAP.md`** — consistency pass complete (2026-07-17):
+  Epistemic Operators section added, Epistemic Runtime Artifact Stores
+  section added (BELIEFS/, FACTS/, EPISTEMIC_EVIDENCE/), Test Suite
+  section updated to enumerate all 10 test files
 
 ## Open Work
 - `Operational State` capability: canonically supported, topology not yet defined.
@@ -83,30 +91,39 @@ and `REPOSITORY_MAP.md`.
   undefined by their owning domains.
 
 ## Current Bottleneck
-Frontera 3 (Integration Scaffold) is complete. All 12 operators are
-covered by `tests/test_integration_e2e.py`.
+Consistency pass (Frontera 3, option 3) is complete. `MATURITY_STATUS.md`
+and `REPOSITORY_MAP.md` are now aligned with the 12-operator / 9-ADR state.
 
-The next meaningful development frontier is one of the following. Owner
-confirmation required to select the direction:
+The two remaining meaningful development frontiers both require an
+**owner ADR decision** before any implementation can proceed:
 
-1. **Operational State topology**: Define the `OPERATIONAL_STATE/`
-   domain and its canonical entity schema. No ADR has been written yet;
-   an ADR-010 would be the natural home.
+1. **Operational State topology** (ADR-010 candidate): Define the
+   `OPERATIONAL_STATE/` domain and its canonical entity schema. Requires
+   an ADR to establish topology under the Repository Topology Derivation
+   principle.
 
-2. **Persistent Knowledge topology**: Define the `PERSISTENT_KNOWLEDGE/`
-   domain, distinct from `BELIEFS/` and `FACTS/`. Requires an ADR to
-   distinguish this domain from the epistemic layer already in place.
+2. **Persistent Knowledge topology** (ADR-010 or ADR-011 candidate):
+   Define the `PERSISTENT_KNOWLEDGE/` domain, distinct from `BELIEFS/`
+   and `FACTS/`. Requires an ADR to distinguish this domain from the
+   epistemic layer already in place.
 
-3. **`MATURITY_STATUS.md` update**: The current maturity file may be
-   stale relative to the 12 implemented operators and 9 ADRs. A
-   consistency pass would bring it in sync.
-
-All three are unblocked. Awaiting owner direction.
+Both frontiers are equally unblocked from a technical standpoint.
+Neither can proceed without explicit owner selection — this is an
+architectural governance decision, not a technical decision.
 
 ## Blocked Decisions
-None.
+- Owner must select which frontier to pursue next: Operational State
+  topology (option 1) or Persistent Knowledge topology (option 2).
+  Both require a new ADR. No implementation will proceed until the
+  direction is confirmed.
 
 ## Recent Decisions
+- **2026-07-17** — Consistency pass complete. `MATURITY_STATUS.md`
+  updated: 9 ADRs all Closed; Epistemic Layer section added (Implemented
+  and test-covered); Cognitive Pipeline section updated to 12 operators
+  and Integration Scaffold. `REPOSITORY_MAP.md` updated: Epistemic
+  Operators section added, Epistemic Runtime Artifact Stores added,
+  Test Suite section updated. No defects detected.
 - **2026-07-17** — Frontera 3 complete. Integration Scaffold implemented:
   `tests/test_integration_e2e.py` covers all 12 operators in three
   test classes (cognitive tramo E2E, epistemic tramo E2E, full 12-operator
@@ -131,9 +148,12 @@ None.
 - **2026-07-16** — Root-level `engine.py` shim added.
 
 ## Next Iteration
-Awaiting owner direction on which frontier to pursue next (see
-Current Bottleneck above). No implementation will proceed without
-explicit confirmation of direction.
+Awaiting owner ADR direction. Two frontiers open:
+1. Operational State topology → requires ADR-010
+2. Persistent Knowledge topology → requires ADR-010 or ADR-011
+
+Once the owner selects a direction and the ADR is drafted, implementation
+can proceed without further pauses.
 
 ## Working Contract
 - Branch: `main`. All work committed directly to `main`.

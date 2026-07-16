@@ -28,15 +28,24 @@ stable.
 
 ### Architectural Decision Records
 Status: All identified behavioral and governance ambiguities resolved
-and absorbed. Seven ADRs have been raised, accepted, and closed, each
+and absorbed. Nine ADRs have been raised, accepted, and closed, each
 having its invariants fully absorbed into the canonical documents.
-Behavioral ambiguities (ADR-001 through ADR-006) concern how the
-organism reasons; governance ambiguities (ADR-007) concern how canonical
-architecture is translated into repository topology. ADR-008 is currently
-proposed to resolve whether Qenki-Mind includes a persistent epistemic
-layer as part of its cognitive architecture and repository topology. Any
-future ADR would only be raised if a new behavioral or governance ambiguity
-producing externally observable divergence is discovered.
+
+- ADR-001 through ADR-006: Behavioral ambiguities — how the organism
+  reasons (Learning→Belief→Fact arc, confidence thresholds, regression
+  and archival rules, conflict resolution).
+- ADR-007: Governance ambiguity — how canonical architecture is
+  translated into repository topology.
+- ADR-008: Persistent Epistemic Layer — whether Qenki-Mind includes a
+  persistent epistemic layer as part of its cognitive architecture and
+  repository topology. Closed and absorbed.
+- ADR-009: Belief Conflict Resolution Rule — how the organism resolves
+  conflicted beliefs by re-evaluating net confidence from applied
+  evidence. Closed and absorbed.
+
+Any future ADR would only be raised if a new behavioral or governance
+ambiguity producing externally observable divergence is discovered.
+Last updated: 2026-07-17.
 
 ## Integration Readiness
 Tracks only Qenki-Mind's own readiness to participate in ecosystem
@@ -74,20 +83,36 @@ QENKI_MIND_GOVERNANCE_RULES_v1.md:
 
 ### Cognitive Pipeline
 Status: **Implemented and test-covered.**
-All six canonical cognitive operators are fully implemented:
+All twelve canonical cognitive operators are fully implemented and
+test-covered.
+
+**Six core pipeline operators:**
 `LearningToMemory`, `MemoryToReasoning`, `OpportunityToDecision`,
 `DecisionToExpression`, `ExpressionToConsequence`, `ConsequenceToLearning`.
+
+**Six epistemic lifecycle operators** (ADR-007 / ADR-008 / ADR-009):
+`LearningToBelief`, `BeliefToFact`, `EvidenceToBeliefUpdate`,
+`BeliefRegression`, `BeliefArchival`, `BeliefConflictResolution`.
+
 The pipeline engine (`CognitiveEngine`), session model (`CognitiveSession`),
 operator registry, and event bus are operational. The REASONERS subsystem
 (`EvidenceRanker`, `HypothesisGenerator`, `ConfidenceEstimator`,
-`DecisionSelector`) is certified and integrated. The full test suite
-covers all operators with execute/persist/emit cycles, pipeline
-integration, and REASONERS contract.
+`DecisionSelector`) is certified and integrated.
+
+The full Belief lifecycle is operational:
+Active → Promoted (via BeliefToFact) → Regressed (via BeliefRegression)
+→ Conflicted (via EvidenceToBeliefUpdate) → Active (via BeliefConflictResolution)
+→ Archived (via BeliefArchival).
+
+The Integration Scaffold (`tests/test_integration_e2e.py`) covers all
+twelve operators end-to-end in three test classes: cognitive tramo E2E,
+epistemic tramo E2E, and full 12-operator pipeline.
+
 The public engine API is artifact-centric: both `engine.run()` and
 `engine.run_pipeline()` return the persisted artifact (`Path`) produced
 by `persist()`, not the internal `execute()` result dict. This contract
 is enforced by `OperatorRunResult` and verified end-to-end in
-`TestPipelineLearningToMemoryToReasoning`. Last updated: 2026-07-16.
+`TestPipelineLearningToMemoryToReasoning`. Last updated: 2026-07-17.
 
 ### Session Persistence
 Status: **Implemented and test-covered.**
@@ -104,6 +129,23 @@ companion types) so that both `from engine import …` and
 `from OPERATORS.engine import …` resolve correctly from the repository
 root. Last updated: 2026-07-16.
 
+### Epistemic Layer
+Status: **Implemented and test-covered.**
+Case: 1 — Capability and topology canonically defined (ADR-007, ADR-008,
+ADR-009 absorbed into canonical documents).
+
+Three runtime artifact stores materialized:
+- `BELIEFS/` — persistent Belief entities (Active, Promoted, Regressed,
+  Conflicted, Archived)
+- `FACTS/` — promoted Fact entities (permanent once created)
+- `EPISTEMIC_EVIDENCE/` — Evidence entities used to update Belief
+  confidence
+
+Promotion threshold calibrated at 0.80 with minimum 1 independent source
+(`REASONING_PARAMETERS/belief_fact_promotion.md`). Full idempotency and
+conflict-guard contracts enforced across all six epistemic operators.
+Last updated: 2026-07-17.
+
 ### Operational State
 The organism's capacity to hold and act on its own reasoning-in-progress.
 Case: 2 — Capability canonically supported, topology not defined.
@@ -112,7 +154,7 @@ repository under the Repository Topology Derivation principle defined in
 QENKI_MIND_GOVERNANCE_RULES_v1.md. This capability is architecturally
 scoped in the canonical documents as a conceptual capacity rather than a
 persistent repository domain; its maturity cannot yet be assessed until
-any corresponding topology is explicitly defined.
+any corresponding topology is explicitly defined via an ADR.
 
 ### Persistent Knowledge
 The organism's capacity to retain canonical memory and permanent records
@@ -124,7 +166,7 @@ QENKI_MIND_GOVERNANCE_RULES_v1.md. The Ontology establishes that Facts
 are semantically permanent once promoted, and architectural
 responsibilities for persistent records are defined by the canonical
 documents and ADRs, but any concrete repository topology remains
-intentionally deferred until explicitly declared.
+intentionally deferred until explicitly declared via an ADR.
 
 ### Supporting Infrastructure
 The organism's capacity to monitor its own health, retain a trace of its
