@@ -45,7 +45,11 @@ the Cognitive Contract Layer. It does not assess whether the rest of
 Qenki® OS fulfills its side of any contract, since that determination
 lies outside Qenki-Mind's authority and visibility.
 
-Status: Not yet assessed.
+Status: Not yet assessed. All four declared external dependencies
+(Constitution, Objectives, Brand Expression Constraints, Situational
+Facts) remain "to be defined at integration" per the Interface Boundary
+Specification. Integration readiness cannot be assessed until at least
+one canonical source is materialized by the owning domain.
 
 ## Operational Maturity
 Reported by capability rather than by repository topology, so that
@@ -78,7 +82,12 @@ operator registry, and event bus are operational. The REASONERS subsystem
 (`EvidenceRanker`, `HypothesisGenerator`, `ConfidenceEstimator`,
 `DecisionSelector`) is certified and integrated. The full test suite
 covers all operators with execute/persist/emit cycles, pipeline
-integration, and REASONERS contract. Last updated: 2026-07-16.
+integration, and REASONERS contract.
+The public engine API is artifact-centric: both `engine.run()` and
+`engine.run_pipeline()` return the persisted artifact (`Path`) produced
+by `persist()`, not the internal `execute()` result dict. This contract
+is enforced by `OperatorRunResult` and verified end-to-end in
+`TestPipelineLearningToMemoryToReasoning`. Last updated: 2026-07-16.
 
 ### Operational State
 The organism's capacity to hold and act on its own reasoning-in-progress.
