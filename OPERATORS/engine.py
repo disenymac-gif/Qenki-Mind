@@ -97,12 +97,13 @@ class CognitiveEngine:
 
     def run(self, operator, entity, session=None, **kwargs):
         """
-        Public API for executing a single operator in isolation.
-        Returns result only, preserving the original return type for
-        backward compatibility with existing and future callers.
+        Public API for executing a single operator.
+        Returns the persisted artifact (Path) so callers can chain
+        operators manually or inspect the output file.
+        run_pipeline() is preferred for multi-step chains.
         """
         run_result = self._run_operator(operator, entity, session=session, **kwargs)
-        return run_result.result
+        return run_result.artifact
 
     def run_pipeline(self, entity, pipeline, session=None, **kwargs):
         """
