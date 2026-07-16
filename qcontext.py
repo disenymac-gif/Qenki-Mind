@@ -78,6 +78,26 @@ def main():
     section("PYTHON VERSION")
     print(sys.version)
 
+    section("README.md HEADER INVENTORY (per top-level directory)")
+    print("Objective structural fact: lines starting with '## ' in each directory's")
+    print("top-level README.md, in file order. No semantic interpretation performed.")
+    for p in sorted(REPO.iterdir(), key=lambda x: x.name):
+        if not p.is_dir() or p.name.startswith(".git"):
+            continue
+        readme = p / "README.md"
+        if not readme.exists():
+            print(f"\n  {p.name}/README.md -> MISSING")
+            continue
+        try:
+            lines = readme.read_text(encoding="utf-8", errors="replace").splitlines()
+        except Exception as e:
+            print(f"\n  {p.name}/README.md -> [error reading: {e}]")
+            continue
+        headers = [l[3:].strip() for l in lines if l.startswith("## ")]
+        print(f"\n  {p.name}/README.md -> {len(headers)} '## ' headers:")
+        for h in headers:
+            print(f"    - {h}")
+
     section("END OF REPORT")
     print("Objective facts only. No content interpreted. No files modified. No git write operations executed.")
 
