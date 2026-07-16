@@ -7,6 +7,10 @@ Run from repository root: python3 qcontext.py
 
 Composition rule: each inspection capability is an independent function.
 main() only orchestrates. No capability is embedded as an ad hoc block.
+
+Exit code contract (public API — do not change meanings, only add new codes):
+  0  report generated successfully
+  1  fatal error (e.g. path is not a Git repository)
 """
 import subprocess
 import sys
@@ -158,6 +162,7 @@ def main():
     report_readme_headers()
     report_small_readmes()
     report_end()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
