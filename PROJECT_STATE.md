@@ -18,11 +18,11 @@ documents frozen. Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md`
 and `REPOSITORY_MAP.md`.
 
 ## Implemented
-- Cognitive pipeline: 10 canonical operators
+- Cognitive pipeline: 11 canonical operators
   (`LearningToMemory`, `MemoryToReasoning`, `OpportunityToDecision`,
   `DecisionToExpression`, `ExpressionToConsequence`, `ConsequenceToLearning`,
   `LearningToBelief`, `BeliefToFact`, `EvidenceToBeliefUpdate`,
-  `BeliefRegression`)
+  `BeliefRegression`, `BeliefArchival`)
 - `CognitiveEngine` with `run()` and `run_pipeline()` (artifact-centric API)
 - `CognitiveSession` model + `_persist_session()` writing to `SESSIONS/`
 - `EventBus` and `OperatorRegistry`
@@ -33,7 +33,7 @@ and `REPOSITORY_MAP.md`.
 - Full test suite: `tests/test_operators.py`, `tests/test_opportunity_to_decision.py`,
   `tests/test_session_persistence.py`, `tests/test_learning_to_belief.py`,
   `tests/test_belief_to_fact.py`, `tests/test_evidence_to_belief_update.py`,
-  `tests/test_belief_regression.py`
+  `tests/test_belief_regression.py`, `tests/test_belief_archival.py`
 - `BELIEFS/` runtime artifact store: persistent epistemic layer (ADR-007/ADR-008)
 - `FACTS/` runtime artifact store: Fact domain materialized (ADR-001 + ADR-008)
 - `EPISTEMIC_EVIDENCE/` runtime artifact store: epistemic Evidence schema
@@ -51,19 +51,29 @@ and `REPOSITORY_MAP.md`.
   + Belief (Active); derives Fact path by convention (fact-<stem>.md);
   appends Change History to both entities; emits FactRegressed event;
   idempotent guard (BeliefNotRegressionPendingError + FactNotFoundError)
+- `BeliefArchival` operator: Belief (any non-Archived state) → Belief (Archived);
+  co-archives corresponding Fact if present (FACTS/fact-<stem>.md → Archived);
+  appends Change History to both entities; emits BeliefArchived +
+  optional FactArchived; idempotent guard (BeliefAlreadyArchivedError);
+  terminal operator — no further epistemic operators defined for Archived state
 - `REASONING_PARAMETERS/belief_fact_promotion.md`: calibrated
   (`promotion_threshold: 0.80`; `minimum_independent_sources: 1`;
   `regression_threshold: 0.50`)
-- ADR-001: Learning → Belief → Fact arc now fully operational
-  (reinforcement + regression directions both implemented)
-- ADR-008: Closed (topology materialized + operators implemented)
+- ADR-001: Learning → Belief → Fact arc fully operational
+  (reinforcement + regression + archival directions all implemented)
+- ADR-008: Closed (topology materialized + full lifecycle implemented)
 - Integration tests: Evidence → Belief → Fact pipeline (end-to-end);
-  Evidence → Belief → Fact → Regression full arc (end-to-end)
+  Evidence → Belief → Fact → Regression full arc (end-to-end);
+  Belief → Fact → Archival arc (end-to-end);
+  Belief → Regression → Archival arc (end-to-end)
 - `PROJECT_STATE.md` (this document)
 
 ## Open Work
-- Belief lifecycle operators not yet implemented:
-  `BeliefArchival`, `BeliefConflictResolution`.
+- `BeliefConflictResolution` operator: not yet implemented.
+  Resolves a 'Conflicted' Belief by adjudicating competing Evidence;
+  transitions to 'Active' or 'Archived'; requires defining the
+  conflict-resolution decision rule (no canonical ADR yet — ADR-009
+  is the natural home).
 - `Operational State` capability: canonically supported, topology not yet defined.
 - `Persistent Knowledge` capability: canonically supported, topology not yet defined.
 - `Supporting Infrastructure` capability: no canonical basis identified yet.
@@ -72,21 +82,36 @@ and `REPOSITORY_MAP.md`.
   undefined by their owning domains.
 
 ## Current Bottleneck
-The full epistemic reinforcement + regression cycle is now implemented.
-The next unblocked lifecycle operator is `BeliefArchival`: transition a
-Belief (and its corresponding Fact, if any) to 'Archived' state when
-the Belief is no longer operationally relevant. No new canonical decisions
-are required — the Archived state is already recognised by ADR-008 and
-the existing entity schemas support it.
+`BeliefConflictResolution` requires a canonical decision on how conflicted
+Beliefs are adjudicated. ADR-008 establishes the 'Conflicted' state and
+the invariant that conflicted Beliefs may not be promoted, but does not
+specify the resolution algorithm. An ADR-009 is needed before implementation
+can proceed.
+
+A lean resolution rule sufficient to unblock implementation:
+  "A Conflicted Belief is resolved by re-evaluating net confidence from
+   all Applied Evidence. If net confidence >= promotion_threshold the
+   Belief is restored to Active (eligible for promotion). If net confidence
+   < promotion_threshold the Belief is restored to Active at its current
+   confidence (eligible for further Evidence accumulation or Archival).
+   The operator never directly promotes; it only resolves the Conflicted
+   state. The ConflictedBeliefError guard in BeliefToFact is the sole
+   gate on promotion eligibility."
+
+This rule is expressible as a one-ADR decision. Awaiting confirmation
+before opening ADR-009.
 
 ## Blocked Decisions
-None currently blocking. `BeliefArchival` is implementable against
-existing canonical basis (ADR-001 + ADR-008).
+- `BeliefConflictResolution`: blocked on ADR-009 (conflict resolution rule).
 
 ## Recent Decisions
+- **2026-07-16** — `BeliefArchival` operator implemented and test-covered
+  (31 tests). Terminal epistemic transition. Full Belief lifecycle
+  (Active → Promoted → Regressed → Archived) now operational.
+  Next unblocked work: ADR-009 + `BeliefConflictResolution`.
 - **2026-07-16** — `BeliefRegression` operator implemented and
   test-covered (28 tests). Full reinforcement + regression epistemic
-  cycle now operational. Next: `BeliefArchival`.
+  cycle now operational.
 - **2026-07-16** — `EvidenceToBeliefUpdate` operator implemented and
   test-covered (25 tests). `EPISTEMIC_EVIDENCE/` topology materialized.
   Evidence → Belief → Fact end-to-end pipeline validated.
@@ -102,13 +127,9 @@ existing canonical basis (ADR-001 + ADR-008).
 - **2026-07-16** — Root-level `engine.py` shim added.
 
 ## Next Iteration
-Implement `BeliefArchival`: transitions a Belief entity (any active
-or Regressed state) to 'Archived', and — if a corresponding Fact exists
-in `FACTS/` — co-archives the Fact to 'Archived' state in the same
-operation. Appends Change History to both entities. Emits
-`BeliefArchived` event (and `FactArchived` if a Fact was co-archived).
-Raises `BeliefAlreadyArchivedError` if the Belief is already Archived.
-Implementable against ADR-001 + ADR-008 with no new canonical decisions.
+Open ADR-009 to canonicalise the `BeliefConflictResolution` rule.
+Proposed decision text is already drafted in Current Bottleneck above.
+Awaiting confirmation to proceed.
 
 ## Working Contract
 - Branch: `main`. All work committed directly to `main`.
