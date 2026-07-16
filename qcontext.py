@@ -98,6 +98,26 @@ def main():
         for h in headers:
             print(f"    - {h}")
 
+    section("FULL RAW CONTENT: README.md files under 15 sections (verbatim)")
+    print("Objective fact: complete, unmodified file content. No interpretation.")
+    print("Threshold chosen for volume control only (avoids dumping large files);")
+    print("does not imply any judgment about the files' architectural role.")
+    for p in sorted(REPO.iterdir(), key=lambda x: x.name):
+        if not p.is_dir() or p.name.startswith(".git"):
+            continue
+        readme = p / "README.md"
+        if not readme.exists():
+            continue
+        try:
+            text = readme.read_text(encoding="utf-8", errors="replace")
+        except Exception as e:
+            continue
+        header_count = len([l for l in text.splitlines() if l.startswith("## ")])
+        if header_count <= 6:
+            print(f"\n  --- BEGIN {p.name}/README.md (verbatim) ---")
+            print(text)
+            print(f"  --- END {p.name}/README.md ---")
+
     section("END OF REPORT")
     print("Objective facts only. No content interpreted. No files modified. No git write operations executed.")
 
