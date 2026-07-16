@@ -1,7 +1,7 @@
 # ADR 008: Persistent Epistemic Layer
 
 ## Status
-Accepted
+Closed
 
 ## Context
 The canonical Ontology defines Belief, Fact, Hypothesis, Evidence, and
@@ -103,6 +103,13 @@ confidence and revision history.
   architectural property)
 - QENKI_MIND_GOVERNANCE_RULES_v1.md (only if the accepted ADR is later
   absorbed into topology derivation language)
+
+## Absorption Record
+- QENKI_MIND_ONTOLOGY_v1.md: absorbed 2026-07-16
+- QENKI_MIND_ORGANS_v1.md: absorbed 2026-07-16
+- QENKI_MIND_COGNITIVE_ARCHITECTURE_v1.md: absorbed 2026-07-16
+- BELIEFS/ topology materialized: 2026-07-16
+- LearningToBelief operator implemented and test-covered: 2026-07-16
 
 ## Relationships
 Depends on ADR-001 for Belief-to-Fact promotion invariants and extends the

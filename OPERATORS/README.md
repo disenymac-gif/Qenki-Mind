@@ -1,6 +1,6 @@
 # OPERATORS
 
-This directory contains the six canonical cognitive operators that
+This directory contains the seven canonical cognitive operators that
 implement Qenki-Mind's processing pipeline, plus the engine
 infrastructure that orchestrates them.
 
@@ -8,6 +8,7 @@ infrastructure that orchestrates them.
 
 LEARNING → LearningToMemory → MEMORY
 MEMORY → MemoryToReasoning → REASONING_PARAMETERS (+ session.memory_loaded)
+LEARNING → LearningToBelief → BELIEFS
 EVIDENCE → OpportunityToDecision → DECISIONS
 DECISIONS → DecisionToExpression → EXPRESSIONS
 EXPRESSIONS → ExpressionToConsequence → EVENTS / WORLD_STATE
@@ -24,6 +25,10 @@ session = engine.start_session(trigger="manual", root_entity="LEARNING/my-entity
 # Run a single operator
 artifact = engine.run("LearningToMemory", "LEARNING/my-entity.md", session=session)
 
+# Run parallel epistemic operators from the same Learning entity
+memory_artifact = engine.run("LearningToMemory", "LEARNING/my-entity.md", session=session)
+belief_artifact  = engine.run("LearningToBelief", "LEARNING/my-entity.md", session=session)
+
 # Run a full pipeline
 result = engine.run_pipeline(
     entity="LEARNING/my-entity.md",
@@ -37,14 +42,15 @@ result = engine.run_pipeline(
 
 ## Operators
 
-| Name | Input | Output | Persists to |
-|---|---|---|---|
-| `LearningToMemory` | `LEARNING/*.md` path | `MEMORY/*.md` path | `MEMORY/` |
-| `MemoryToReasoning` | `MEMORY/*.md` path | `REASONING_PARAMETERS/*.md` path | `REASONING_PARAMETERS/` + `session.memory_loaded` |
-| `OpportunityToDecision` | `EVIDENCE/*.md` path | `DECISIONS/*.md` path | `DECISIONS/` |
-| `DecisionToExpression` | `DECISIONS/*.md` path | `EXPRESSIONS/*.md` path | `EXPRESSIONS/` |
-| `ExpressionToConsequence` | `EXPRESSIONS/*.md` path | Event record | `EVENTS/` |
-| `ConsequenceToLearning` | Event record path | `LEARNING/*.md` path | `LEARNING/` |
+| Name | Input | Output | Persists to | Authority |
+|---|---|---|---|---|
+| `LearningToMemory` | `LEARNING/*.md` path | `MEMORY/*.md` path | `MEMORY/` | Memory Organ |
+| `MemoryToReasoning` | `MEMORY/*.md` path | `REASONING_PARAMETERS/*.md` path | `REASONING_PARAMETERS/` + `session.memory_loaded` | Memory Organ |
+| `LearningToBelief` | `LEARNING/*.md` path | `BELIEFS/*.md` path | `BELIEFS/` | Learning & Reflection Organ (ADR-008) |
+| `OpportunityToDecision` | `EVIDENCE/*.md` path | `DECISIONS/*.md` path | `DECISIONS/` | Decision Organ |
+| `DecisionToExpression` | `DECISIONS/*.md` path | `EXPRESSIONS/*.md` path | `EXPRESSIONS/` | Expression Organ |
+| `ExpressionToConsequence` | `EXPRESSIONS/*.md` path | Event record | `EVENTS/` | Learning & Reflection Organ |
+| `ConsequenceToLearning` | Event record path | `LEARNING/*.md` path | `LEARNING/` | Learning & Reflection Organ |
 
 ## Infrastructure
 
@@ -52,7 +58,7 @@ result = engine.run_pipeline(
 |---|---|
 | `engine.py` | `CognitiveEngine`, `CognitiveSession`, `CognitiveOperator`, `EventBus`, `OperatorRunResult` |
 | `registry.py` | `OperatorRegistry` — key/class store |
-| `__init__.py` | `default_registry` (all 6 operators pre-registered), `build_engine()` factory |
+| `__init__.py` | `default_registry` (all 7 operators pre-registered), `build_engine()` factory |
 
 ## Adding an operator
 

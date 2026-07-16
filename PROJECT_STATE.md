@@ -13,15 +13,15 @@ main
 2026-07-16
 
 ## Current Architecture
-Eight ADRs total. ADR-001 through ADR-007 absorbed. ADR-008 accepted and
-absorbed into ONTOLOGY_v1, ORGANS_v1, and COGNITIVE_ARCHITECTURE_v1.
-Six canonical documents frozen. Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md`
+Eight ADRs total. ADR-001 through ADR-008 all Closed. Six canonical
+documents frozen. Full reference: `QENKI_MIND_GOVERNANCE_RULES_v1.md`
 and `REPOSITORY_MAP.md`.
 
 ## Implemented
-- Cognitive pipeline: 6 canonical operators
+- Cognitive pipeline: 7 canonical operators
   (`LearningToMemory`, `MemoryToReasoning`, `OpportunityToDecision`,
-  `DecisionToExpression`, `ExpressionToConsequence`, `ConsequenceToLearning`)
+  `DecisionToExpression`, `ExpressionToConsequence`, `ConsequenceToLearning`,
+  `LearningToBelief`)
 - `CognitiveEngine` with `run()` and `run_pipeline()` (artifact-centric API)
 - `CognitiveSession` model + `_persist_session()` writing to `SESSIONS/`
 - `EventBus` and `OperatorRegistry`
@@ -30,16 +30,19 @@ and `REPOSITORY_MAP.md`.
 - `entity_markdown.py`: canonical entity serialisation / deserialisation
 - `engine.py` root shim: re-exports `CognitiveEngine` et al. from `OPERATORS/engine.py`
 - Full test suite: `tests/test_operators.py`, `tests/test_opportunity_to_decision.py`,
-  `tests/test_session_persistence.py`
-- ADR-008 accepted and absorbed: persistent epistemic layer is now an
-  architectural invariant across ONTOLOGY_v1, ORGANS_v1, COGNITIVE_ARCHITECTURE_v1
+  `tests/test_session_persistence.py`, `tests/test_learning_to_belief.py`
+- `BELIEFS/` runtime artifact store: persistent epistemic layer materialized
+  (topology declared per ADR-007, basis: ADR-008)
+- `LearningToBelief` operator: Learning entity -> Belief entity, owned by
+  Learning & Reflection Organ; BeliefCreated event; idempotent persist
+- ADR-008: Closed (canonical documents absorbed + topology materialized +
+  operator implemented)
 - `PROJECT_STATE.md` (this document)
 
 ## Open Work
-- Persistent epistemic layer topology: `BELIEFS/` domain (or equivalent
-  substrate) not yet materialized. ADR-008 is accepted; materialization
-  requires an explicit topology decision per the Repository Topology
-  Derivation principle (ADR-007 / Governance Rules).
+- Belief lifecycle operators not yet implemented:
+  `BeliefToFact` (ADR-001 promotion), `BeliefRegression`,
+  `BeliefArchival`, `BeliefConflictResolution`.
 - `Operational State` capability: canonically supported, topology not yet defined.
 - `Persistent Knowledge` capability: canonically supported, topology not yet defined.
 - `Supporting Infrastructure` capability: no canonical basis identified yet.
@@ -48,35 +51,37 @@ and `REPOSITORY_MAP.md`.
   undefined by their owning domains.
 
 ## Current Bottleneck
-Persistent epistemic layer topology is not yet materialized. ADR-008 has
-been accepted and absorbed into the canonical documents, but the `BELIEFS/`
-domain (or chosen substrate) must now be explicitly declared under ADR-007
-before any Belief persistence operators can be implemented.
+Belief lifecycle is incomplete. `LearningToBelief` creates Beliefs at
+neutral confidence (0.50), but the promotion path (ADR-001: Belief → Fact
+when convergent Evidence crosses the owned threshold) has no operator.
+`BeliefToFact` is the highest-impact next operator: it closes the
+Learning → Belief → Fact epistemic arc and makes the confidence threshold
+in `REASONING_PARAMETERS/belief_fact_promotion.md` operationally active
+for the first time.
 
 ## Blocked Decisions
-- **Epistemic topology materialization** — No blocker at ADR level. The
-  topology decision (`BELIEFS/` directory, separate datastore, or other
-  form) must be taken explicitly under the Repository Topology Derivation
-  principle (ADR-007). Once declared, Belief operators and persistence can
-  be implemented.
+None. All ADRs are Closed. `BeliefToFact` implementation may proceed
+immediately; canonical basis is ADR-001 + ADR-008.
 
 ## Recent Decisions
-- **2026-07-16** — ADR-008 accepted and absorbed. ONTOLOGY_v1 updated
-  with Belief epistemic invariants and Learning epistemic feedback.
-  ORGANS_v1 updated with authority boundaries for all organs re: epistemic
-  layer. COGNITIVE_ARCHITECTURE_v1 updated with epistemic feedback path
-  and rhythm-level epistemic actions.
-- **2026-07-16** — `PROJECT_STATE.md` introduced as single-file
-  operational context snapshot. Updated in same commit as each
-  relevant implementation.
+- **2026-07-16** — `BELIEFS/` topology materialized per ADR-007/ADR-008.
+  `LearningToBelief` operator implemented and test-covered (18 tests).
+  ADR-008 transitioned to Closed.
+- **2026-07-16** — ADR-008 accepted and absorbed into ONTOLOGY_v1,
+  ORGANS_v1, COGNITIVE_ARCHITECTURE_v1.
+- **2026-07-16** — `PROJECT_STATE.md` introduced as operational context
+  snapshot. Updated in same commit as each relevant implementation.
 - **2026-07-16** — Session persistence implemented and test-covered.
 - **2026-07-16** — Root-level `engine.py` shim added.
 
 ## Next Iteration
-Declare the persistent epistemic layer topology under ADR-007
-(e.g., `BELIEFS/` directory as a runtime artifact store), then implement
-the Belief entity schema and the first Belief-lifecycle operator
-(`LearningToBelief` or equivalent).
+Implement `BeliefToFact` operator: reads a Belief entity from `BELIEFS/`,
+checks whether the confidence threshold in
+`REASONING_PARAMETERS/belief_fact_promotion.md` is met with convergent,
+independently-sourced Evidence, and if so promotes the Belief to Fact
+status inside the persistent epistemic layer (ADR-001 + ADR-008). Also
+creates the corresponding entry in a new `FACTS/` runtime artifact store
+(topology to be derived from ADR-001 + ADR-008 as basis).
 
 ## Working Contract
 - Branch: `main`. All work committed directly to `main`.
