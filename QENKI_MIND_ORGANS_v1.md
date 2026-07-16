@@ -47,7 +47,7 @@ deferred to the next cycle.
 **Epistemic proposal boundary (binding, from ADR-008):** Sense-Making may
 produce Beliefs as new epistemic objects, but creation of a Belief's
 authoritative entry in the persistent epistemic layer requires Learning &
-Reflection to enact it. Sense-Making’s formed Beliefs are proposals until
+Reflection to enact it. Sense-Making's formed Beliefs are proposals until
 acted upon by the owning organ.
 
 ### Opportunity Organ
@@ -123,13 +123,23 @@ permanently distinct. This ownership is not bounded by any specific
 persistence substrate; it applies regardless of whether the layer is
 materialized as a repository directory, a datastore, or another form.
 
+**Conflict resolution authority (binding, from ADR-009):** Learning &
+Reflection is the sole organ authorized to resolve a Conflicted Belief.
+Resolution is enacted by the `BeliefConflictResolution` operator, which
+re-evaluates net confidence from the Belief's Applied Evidence corpus and
+transitions the Belief to 'Active'. The operator never promotes directly;
+`BeliefToFact` and its `ConflictedBeliefError` guard remain the sole
+promotion gate. No other organ may exit a Belief from the 'Conflicted'
+state.
+
 ## Architectural Decisions Incorporated
 - ADR-001: Belief to Fact Promotion Invariant — Status: Closed
 - ADR-002: Insight Handoff Authority — Status: Closed
 - ADR-003: Critic Rejection Semantics — Status: Closed
 - ADR-004: Consequence Contract Completion Semantics — Status: Closed
 - ADR-005: Mental Model Deprecation Authority — Status: Closed
-- ADR-008: Persistent Epistemic Layer — Status: Accepted and absorbed
+- ADR-008: Persistent Epistemic Layer — Status: Closed
+- ADR-009: Belief Conflict Resolution Rule — Status: Closed
 
 ## Relationships
 Consulted alongside QENKI_MIND_ONTOLOGY_v1.md and

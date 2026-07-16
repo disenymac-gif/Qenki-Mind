@@ -67,6 +67,18 @@ view materialized from Memory, Evidence, Decision, or World State.
 - Decisions may consume the persistent epistemic layer but may not
   authoritatively mutate it.
 
+**Conflict Resolution Invariant (binding, from ADR-009):** A Conflicted
+Belief exits the 'Conflicted' state exclusively through the
+`BeliefConflictResolution` operator, owned by Learning & Reflection. The
+operator re-evaluates net confidence from the Belief's entire corpus of
+Applied Evidence (Supporting strength minus Contradicting strength, clamped
+to [0.0, 1.0]) and transitions the Belief to 'Active'. Resolution never
+directly promotes the Belief to Fact; `BeliefToFact` and its
+`ConflictedBeliefError` guard remain the sole promotion gate. The
+resolution algorithm is deterministic and evidence-grounded: no external
+authority or subjective judgment may substitute for the net confidence
+calculation. Evidence entities are read-only during resolution.
+
 A Belief becomes Fact (see Promotion Invariant below), Insight,
 or is archived upon disconfirmation.
 
@@ -184,7 +196,8 @@ is discarded.
 - ADR-002: Insight Handoff Authority — Status: Closed
 - ADR-005: Mental Model Deprecation Authority — Status: Closed
 - ADR-006: Observation Snapshot Semantics — Status: Closed
-- ADR-008: Persistent Epistemic Layer — Status: Accepted and absorbed
+- ADR-008: Persistent Epistemic Layer — Status: Closed
+- ADR-009: Belief Conflict Resolution Rule — Status: Closed
 
 ## Relationships
 Consumed by every organ. Consulted alongside QENKI_MIND_ORGANS_v1.md and

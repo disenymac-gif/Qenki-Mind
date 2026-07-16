@@ -8,29 +8,30 @@ All operators follow the `CognitiveOperator` interface defined in
 ## Pipeline
 
 ```
-Learning  -->  LearningToMemory       -->  MEMORY/
-                                           |
-               MemoryToReasoning      -->  REASONING/
-                                           |
-               OpportunityToDecision  -->  DECISIONS/
-                                           |
-               DecisionToExpression   -->  EXPRESSIONS/
-                                           |
-               ExpressionToConsequence -->  CONSEQUENCES/
-                                           |
-               ConsequenceToLearning  -->  LEARNING/
-                                           |
-               LearningToBelief       -->  BELIEFS/
-                                           |
-               BeliefToFact           -->  FACTS/           (promotion arc)
-                                           |
-               EvidenceToBeliefUpdate -->  BELIEFS/         (evidence arc)
-                   |                            |
-                   +-- sets Regression Pending  |
-                                                v
-               BeliefRegression       -->  FACTS/ (Regressed) + BELIEFS/ (Active)
-                                           |
-               BeliefArchival         -->  BELIEFS/ (Archived) [+ FACTS/ (Archived)]
+Learning  -->  LearningToMemory            -->  MEMORY/
+                                                |
+               MemoryToReasoning          -->  REASONING/
+                                                |
+               OpportunityToDecision      -->  DECISIONS/
+                                                |
+               DecisionToExpression       -->  EXPRESSIONS/
+                                                |
+               ExpressionToConsequence    -->  CONSEQUENCES/
+                                                |
+               ConsequenceToLearning      -->  LEARNING/
+                                                |
+               LearningToBelief           -->  BELIEFS/ (Active)
+                                                |
+               BeliefToFact              -->  FACTS/ (Promoted)
+                                                |
+               EvidenceToBeliefUpdate    -->  BELIEFS/ (confidence delta)
+                   |                                |
+                   +-- sets Regression Pending      |
+                   +-- sets Conflicted              |
+                                                    v
+               BeliefRegression          -->  FACTS/ (Regressed) + BELIEFS/ (Active)
+               BeliefConflictResolution  -->  BELIEFS/ (Active, re-evaluated)
+               BeliefArchival            -->  BELIEFS/ (Archived) [+ FACTS/ (Archived)]
 ```
 
 ## Operators
@@ -40,7 +41,7 @@ Learning  -->  LearningToMemory       -->  MEMORY/
 | 1 | `LearningToMemory` | `LEARNING/` | `MEMORY/` | Learning & Reflection Organ |
 | 2 | `MemoryToReasoning` | `MEMORY/` | `REASONING/` | Learning & Reflection Organ |
 | 3 | `OpportunityToDecision` | `REASONING/` | `DECISIONS/` | Decision Organ |
-| 4 | `DecisionToExpression` | `DECISIONS/` | `EXPRESSIONS/` | Expression Organ |
+| 4 | `DecisionToExpression` | `DECISIONS/` | `EXPRESSIONS/` | Decision Organ |
 | 5 | `ExpressionToConsequence` | `EXPRESSIONS/` | `CONSEQUENCES/` | Expression Organ |
 | 6 | `ConsequenceToLearning` | `CONSEQUENCES/` | `LEARNING/` | Learning & Reflection Organ |
 | 7 | `LearningToBelief` | `LEARNING/` | `BELIEFS/` | Learning & Reflection Organ |
@@ -48,30 +49,34 @@ Learning  -->  LearningToMemory       -->  MEMORY/
 | 9 | `EvidenceToBeliefUpdate` | `EPISTEMIC_EVIDENCE/` | `BELIEFS/` | Learning & Reflection Organ |
 | 10 | `BeliefRegression` | `BELIEFS/` (Regression Pending) | `FACTS/` (Regressed) + `BELIEFS/` (Active) | Learning & Reflection Organ |
 | 11 | `BeliefArchival` | `BELIEFS/` (any non-Archived) | `BELIEFS/` (Archived) [+ `FACTS/` (Archived)] | Learning & Reflection Organ |
+| 12 | `BeliefConflictResolution` | `BELIEFS/` (Conflicted) | `BELIEFS/` (Active, re-evaluated) | Learning & Reflection Organ |
 
-## Epistemic Lifecycle (ADR-001 + ADR-008)
+## Full Epistemic Lifecycle (ADR-001 + ADR-008 + ADR-009)
 
 ```
 Learning  -[LearningToBelief]->   Belief (Active)
                                        |
-                               [BeliefToFact]
-                                       |
-                                  Fact (Promoted)
-                                       |
-                      [EvidenceToBeliefUpdate: Contradicting]
-                                       |
-                           Belief (Regression Pending)
-                                       |
-                            [BeliefRegression]
-                                       |
-                    Fact (Regressed) + Belief (Active)
-                                       |
-                             [BeliefArchival]  (terminal)
-                                       |
-             Belief (Archived) [+ Fact (Archived)]  ✓
-
-Accepted archival input states:
-  Active | Promoted | Regressed | Regression Pending | Conflicted
+                        +---- [BeliefToFact] ----+
+                        |                        |
+                   Fact (Promoted)         ConflictedBeliefError
+                        |                  (if Conflicted)
+          [EvidenceToBeliefUpdate]
+                        |
+            +-----------+-----------+
+            |                       |
+   Regression Pending          Conflicted
+            |                       |
+   [BeliefRegression]   [BeliefConflictResolution]
+            |                       |
+   Fact (Regressed)          Belief (Active)
+   + Belief (Active)     (re-evaluated confidence;
+            |             eligible for BeliefToFact
+            |             if net >= threshold)
+            +-------+-------+
+                    |
+             [BeliefArchival]  <- terminal
+                    |
+      Belief (Archived) [+ Fact (Archived)]
 ```
 
-The full Belief lifecycle is now implemented.
+The full Belief lifecycle is implemented. All 12 operators are operational.

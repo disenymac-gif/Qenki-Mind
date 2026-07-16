@@ -1,6 +1,6 @@
 """Operator registry for Qenki-Mind cognitive pipeline.
 
-All eleven canonical operators are imported here so that
+All twelve canonical operators are imported here so that
 ``from OPERATORS import <Name>`` resolves correctly and the
 OperatorRegistry in engine.py can discover them by name.
 """
@@ -15,6 +15,7 @@ from OPERATORS.BeliefToFact.operator import Operator as BeliefToFact
 from OPERATORS.EvidenceToBeliefUpdate.operator import Operator as EvidenceToBeliefUpdate
 from OPERATORS.BeliefRegression.operator import Operator as BeliefRegression
 from OPERATORS.BeliefArchival.operator import Operator as BeliefArchival
+from OPERATORS.BeliefConflictResolution.operator import Operator as BeliefConflictResolution
 
 __all__ = [
     "LearningToMemory",
@@ -28,4 +29,5 @@ __all__ = [
     "EvidenceToBeliefUpdate",
     "BeliefRegression",
     "BeliefArchival",
+    "BeliefConflictResolution",
 ]
